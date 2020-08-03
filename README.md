@@ -11,6 +11,7 @@ Google Photos is powerful for finding a photo via English. It can also support s
   - Webpack
   - Babel
 - Material UI
+- [React Google Login](https://www.npmjs.com/package/react-google-login)
 
 ## License
 
@@ -20,5 +21,5 @@ The code is available under the [MIT license](LICENSE).
 
 ```bash
 npm install @material-ui/core --save-dev
+npm install react-google-login --save-dev
 ```
-

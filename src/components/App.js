@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import Photos from './Photos/Photos';
 import SearchBar from './SearchBar';
 import TitleComponent from './TitleComponent';
-import Signin from './Signin';
+import GoogleBtn from './GoogleBtn';
 import * as googleAPI from './gapi';
 
 export default class App extends Component {
@@ -29,7 +29,7 @@ export default class App extends Component {
         <CssBaseline />
 
         <TitleComponent />
-        <Signin />
+        <GoogleBtn />
         <SearchBar />
         <Photos />
       </div>

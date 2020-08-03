@@ -9,8 +9,10 @@ export const clientSecret = credentials.web.client_secret;
 export function loadApi() {
   // get the api file
   const script = document.createElement('script');
-  script.src = 'https://apis.google.com/js/client.js';
-  // console.log(gapi);
+  script.src = 'https://apis.google.com/js/platform.js';
+  script.setAttribute('async', 'true');
+  script.setAttribute('defer', 'true');
+
   init();
   // load
   // script.onload = () => {
