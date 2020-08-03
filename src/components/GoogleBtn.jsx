@@ -34,6 +34,7 @@ export default function GoogleBtn() {
     if (response.accessToken) {
       setIsLogined(true);
       setAccessToken(response.accessToken);
+      request(isLogined);
     }
   };
 
@@ -50,21 +51,41 @@ export default function GoogleBtn() {
     alert('Failed to log out');
   };
 
-  const request = () => {
-    if (isLogined) {
+  const request = (signined) => {
+    if (signined) {
       const GoogleAuth = window.gapi.auth2.getAuthInstance();
-      const option = new gapi.auth2.SigninOptionsBuilder();
-      option.setScope('');
+      const googleUser = GoogleAuth.currentUser.get();
+      const currentScope = googleUser.getGrantedScopes();
 
-      const googleUser = gapi.auth2.currentUser.get();
-      googleUser.grant(options).then(
-        function (success) {
-          console.log(JSON.stringify({ message: 'success', value: success }));
-        },
-        function (fail) {
-          alert(JSON.stringify({ message: 'fail', value: fail }));
-        }
-      );
+      let myHeaders = new Headers();
+      myHeaders.append('Content-Type', 'application/json');
+
+      const myInit = {
+        method: 'GET',
+        headers: myHeaders,
+        mode: 'cors',
+        cache: 'default',
+      };
+
+      let myRequest = new Request(`https://photoslibrary.googleapis.com/v1/mediaItems?access_token=${accessToken}`);
+
+      fetch(myRequest, myInit).then(function (response) {
+        console.log(response);
+      });
+
+      // const option = new gapi.auth2.SigninOptionsBuilder();
+      // option.setScope('');
+
+      // googleUser.grant(options).then(
+      //   function (success) {
+      //     console.log(JSON.stringify({ message: 'success', value: success }));
+      //   },
+      //   function (fail) {
+      //     alert(JSON.stringify({ message: 'fail', value: fail }));
+      //   }
+      // );
+    } else {
+      console.log('Not Sign-in');
     }
   };
 
@@ -84,6 +105,7 @@ export default function GoogleBtn() {
           onFailure={handleLoginFailure}
           cookiePolicy={'single_host_origin'}
           responseType='code,token'
+          scope={oauth2.scopes[1]}
         />
       )}
     </React.Fragment>
