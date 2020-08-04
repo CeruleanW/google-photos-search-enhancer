@@ -1,7 +1,7 @@
 /* global gapi */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { GoogleLogin, GoogleLogout, useGoogleLogout } from 'react-google-login';
+import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import * as credentials from './credentials.json';
 
 const oauth2 = {
@@ -26,15 +26,12 @@ export default function GoogleBtn() {
   // const classes = useStyles();
   const [isLogined, setIsLogined] = useState(false);
   const [accessToken, setAccessToken] = useState('');
-  const responseGoogle = (response) => {
-    console.log(response);
-  };
 
   const login = (response) => {
     if (response.accessToken) {
       setIsLogined(true);
       setAccessToken(response.accessToken);
-      request(isLogined);
+      handleRequest(response.accessToken);
     }
   };
 
@@ -42,51 +39,46 @@ export default function GoogleBtn() {
     setIsLogined(false);
     setAccessToken('');
   };
-
   const handleLoginFailure = (response) => {
     alert('Failed to log in');
   };
-
   const handleLogoutFailure = (response) => {
     alert('Failed to log out');
   };
 
-  const request = (signined) => {
-    if (signined) {
-      const GoogleAuth = window.gapi.auth2.getAuthInstance();
-      const googleUser = GoogleAuth.currentUser.get();
-      const currentScope = googleUser.getGrantedScopes();
+  // Set the fetch object
+  const instantiateFetch = (token, httpMethod, apiURL) => {
+    let myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json');
+    myHeaders.append('Authorization', `Bearer ${token}`);
+    const myInit = {
+      method: httpMethod,
+      headers: myHeaders,
+      mode: 'cors',
+      cache: 'default',
+    };
+    const myRequest = new Request(`${apiURL}?access_token=${token}&pageSize=100`);
+    return fetch(myRequest, myInit);
+  };
 
-      let myHeaders = new Headers();
-      myHeaders.append('Content-Type', 'application/json');
+  // must run after the log-in is completed
+  const handleRequest = (token) => {
+    console.log('handleRequest is called');
+    const GoogleAuth = window.gapi.auth2.getAuthInstance();
+    // const googleUser = GoogleAuth.currentUser.get();
 
-      const myInit = {
-        method: 'GET',
-        headers: myHeaders,
-        mode: 'cors',
-        cache: 'default',
-      };
-
-      let myRequest = new Request(`https://photoslibrary.googleapis.com/v1/mediaItems?access_token=${accessToken}`);
-
-      fetch(myRequest, myInit).then(function (response) {
-        console.log(response);
+    instantiateFetch(
+      token,
+      'GET',
+      'https://photoslibrary.googleapis.com/v1/mediaItems'
+    )
+      .then( (response) => {
+        console.log('Fetch data is done');
+        return response.json();
+      })
+      .then(function (json) {
+        console.log(json);
       });
-
-      // const option = new gapi.auth2.SigninOptionsBuilder();
-      // option.setScope('');
-
-      // googleUser.grant(options).then(
-      //   function (success) {
-      //     console.log(JSON.stringify({ message: 'success', value: success }));
-      //   },
-      //   function (fail) {
-      //     alert(JSON.stringify({ message: 'fail', value: fail }));
-      //   }
-      // );
-    } else {
-      console.log('Not Sign-in');
-    }
   };
 
   return (
@@ -106,6 +98,7 @@ export default function GoogleBtn() {
           cookiePolicy={'single_host_origin'}
           responseType='code,token'
           scope={oauth2.scopes[1]}
+          isSignedIn={true}
         />
       )}
     </React.Fragment>

@@ -2,7 +2,7 @@
 
 ## Intro
 
-Google Photos is powerful for finding a photo via English. It can also support searching photos by some common words in Chinese. However, you cannot search specific text in Chinese within names or descriptions. This app will enable you to do so.
+Google Photos is powerful for finding a photo via English. It can also support searching photos by some general keywords in Chinese. However, you cannot search specific text in Chinese within names or descriptions. This app will enable you to do so.
 
 ## Development Tools
 
