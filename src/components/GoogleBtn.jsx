@@ -65,21 +65,42 @@ export default function GoogleBtn() {
   const handleRequest = (token) => {
     console.log('handleRequest is called');
     const GoogleAuth = window.gapi.auth2.getAuthInstance();
-    // const googleUser = GoogleAuth.currentUser.get();
+    const user = GoogleAuth.currentUser.get();
 
-    instantiateFetch(
+    // Cache API
+    const cache = caches.open('LocalMediaItems');
+
+    const test = getAPageOfMediaItems(token);
+  };
+
+  function getAllMediaItems(token) {
+    let onePageData = getAPageOfMediaItems(token);
+    // store the returned data
+
+    while (onePageData.nextPageToken) {
+      // use the token to get the data in the next page
+      onePageData = getAPageOfMediaItems(onePageData.nextPageToken);
+    }
+    // return all media items
+  }
+
+  function getAPageOfMediaItems(token) {
+    const data = instantiateFetch(
       token,
       'GET',
       'https://photoslibrary.googleapis.com/v1/mediaItems'
     )
       .then( (response) => {
-        console.log('Fetch data is done');
+        console.log('Fetch is successful');
         return response.json();
       })
       .then(function (json) {
         console.log(json);
+        return json;
       });
-  };
+
+    return data;
+  }
 
   return (
     <React.Fragment>
