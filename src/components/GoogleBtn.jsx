@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import * as credentials from './credentials.json';
 import dbPromise from './IndexedDB';
+import * as GapiConnection from './GapiConnection';
 
 const oauth2 = {
   clientID: credentials.web.client_id,
@@ -47,77 +48,90 @@ export default function GoogleBtn() {
     alert('Failed to log out');
   };
 
-  // Set and return the fetch object
-  const instantiateFetch = (token, httpMethod, apiURL) => {
+  // return an init object for Fetch
+  const createFetchInit = (accessToken, httpMethod) => {
     let myHeaders = new Headers();
     myHeaders.append('Content-Type', 'application/json');
-    myHeaders.append('Authorization', `Bearer ${token}`);
+    myHeaders.append('Authorization', `Bearer ${accessToken}`);
     const myInit = {
       method: httpMethod,
       headers: myHeaders,
       mode: 'cors',
       cache: 'default',
     };
-    const myRequest = new Request(
-      `${apiURL}?access_token=${token}&pageSize=100`
-    );
-    return fetch(myRequest, myInit);
+
+    return myInit;
   };
 
-  async function getAllMediaItems(token) {
-    let onePageData = getAPageOfMediaItems(token);
-    // store the returned data
-
-    while (onePageData.nextPageToken) {
-      // use the token to get the data in the next page
-      onePageData = getAPageOfMediaItems(onePageData.nextPageToken);
+  const createRequest = (accessToken, apiURL, pageToken) => {
+    let url;
+    if (pageToken) {
+      url = `${apiURL}?access_token=${accessToken}&pageSize=100&pageToken=${pageToken}`;
+    } else {
+      url = `${apiURL}?access_token=${accessToken}&pageSize=100`;
     }
-    // return all media items
+    return new Request(url);
+  };
+
+  // request for all media items and store the result in the IndexedDB
+  async function getAllMediaItems(accessToken) {
+    let nextToken;
+    // fetch a page of data from Google API
+    let onePageData = await getAPageOfMediaItems(accessToken);
+    nextToken = onePageData.nextPageToken;
+
+    while (nextToken) {
+      // use the nextPageToken to get the data in the next page
+      nextToken = onePageData.nextPageToken;
+      const storingData = onePageData.mediaItems;
+      storeMediaItems(storingData, dbPromise);
+      onePageData = await getAPageOfMediaItems(accessToken, nextToken);
+
+      // await onePageData
+      //   .then(function fulfilled(onePageData) {
+      //     nextToken = onePageData.nextPageToken;
+      //     storeMediaItems(onePageData.mediaItems, dbPromise);
+      //     return nextToken;
+      //   })
+      //   .then(function fulfilled(nextToken) {
+      //     onePageData = getAPageOfMediaItems(nextToken);
+      //   });
+    }
   }
 
-  // return a Promise wrapping the response
-  function getAPageOfMediaItems(token) {
-    return instantiateFetch(
-      token,
-      'GET',
-      'https://photoslibrary.googleapis.com/v1/mediaItems'
-    ).then((response) => {
-      console.log('Fetch is successful');
-      return response.json();
-    });
+  // return a Promise wrapping the response JSON
+  function getAPageOfMediaItems(accessToken, pageToken) {
+    const request = createRequest(accessToken, 'https://photoslibrary.googleapis.com/v1/mediaItems', pageToken);
+    const myInit = createFetchInit(accessToken, 'GET');
+    return fetch(request, myInit)
+      .then((response) => {
+        console.log('Fetch is successful');
+        return response.json();
+      })
+      .catch((reject) => {
+        console.log('Rejected' + reject);
+      });
   }
 
   async function storeMediaItems(mediaItems, dbPromise) {
     const db = await dbPromise;
-    
     const tx = db.transaction('localMediaItems', 'readwrite');
-    const storeAddPromiseArray = mediaItems.map((value) => {
+    mediaItems.forEach((value) => {
       return new Promise((resolve, reject) => {
         resolve(tx.store.put(value));
+      }).catch((error) => {
+        console.log('Error: failed to store data in IndexedDB' + error);
       });
     });
-    // await Promise.all([...storeAddPromiseArray, tx.done]);
   }
 
   // must run after the log-in is completed
-  const handleRequest = (token) => {
+  const handleRequest = (accessToken) => {
     console.log('handleRequest is called');
     const GoogleAuth = window.gapi.auth2.getAuthInstance();
     const user = GoogleAuth.currentUser.get();
-    console.log(dbPromise);
 
-    // fetch data from Google API
-    let test;
-    getAPageOfMediaItems(token).then((response) => {
-      console.log(response);
-      // put all media items in the database
-      storeMediaItems(response.mediaItems, dbPromise);
-    });
-
-    console.log('returned test: ' + test);
-
-    // store data to the database 'LocalMediaItems'
-
+    getAllMediaItems(accessToken);
     // retrieve data from database
   };
 

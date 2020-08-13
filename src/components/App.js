@@ -4,7 +4,7 @@ import Photos from './Photos/Photos';
 import SearchBar from './SearchBar';
 import TitleComponent from './TitleComponent';
 import GoogleBtn from './GoogleBtn';
-import * as googleAPI from './gapi';
+import * as GapiConnection from './GapiConnection';
 
 export default class App extends Component {
   constructor(props) {
