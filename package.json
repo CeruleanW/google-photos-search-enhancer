@@ -8,7 +8,7 @@
     "@testing-library/user-event": "^7.1.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1"
+    "react-scripts": "^3.4.3"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@material-ui/core": "^4.11.0",
+    "idb": "^5.0.4",
     "react-google-login": "^5.1.21"
   }
 }

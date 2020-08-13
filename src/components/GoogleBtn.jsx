@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import * as credentials from './credentials.json';
+import dbPromise from './IndexedDB';
 
 const oauth2 = {
   clientID: credentials.web.client_id,
@@ -46,7 +47,7 @@ export default function GoogleBtn() {
     alert('Failed to log out');
   };
 
-  // Set the fetch object
+  // Set and return the fetch object
   const instantiateFetch = (token, httpMethod, apiURL) => {
     let myHeaders = new Headers();
     myHeaders.append('Content-Type', 'application/json');
@@ -57,23 +58,13 @@ export default function GoogleBtn() {
       mode: 'cors',
       cache: 'default',
     };
-    const myRequest = new Request(`${apiURL}?access_token=${token}&pageSize=100`);
+    const myRequest = new Request(
+      `${apiURL}?access_token=${token}&pageSize=100`
+    );
     return fetch(myRequest, myInit);
   };
 
-  // must run after the log-in is completed
-  const handleRequest = (token) => {
-    console.log('handleRequest is called');
-    const GoogleAuth = window.gapi.auth2.getAuthInstance();
-    const user = GoogleAuth.currentUser.get();
-
-    // Cache API
-    const cache = caches.open('LocalMediaItems');
-
-    const test = getAPageOfMediaItems(token);
-  };
-
-  function getAllMediaItems(token) {
+  async function getAllMediaItems(token) {
     let onePageData = getAPageOfMediaItems(token);
     // store the returned data
 
@@ -84,23 +75,51 @@ export default function GoogleBtn() {
     // return all media items
   }
 
+  // return a Promise wrapping the response
   function getAPageOfMediaItems(token) {
-    const data = instantiateFetch(
+    return instantiateFetch(
       token,
       'GET',
       'https://photoslibrary.googleapis.com/v1/mediaItems'
-    )
-      .then( (response) => {
-        console.log('Fetch is successful');
-        return response.json();
-      })
-      .then(function (json) {
-        console.log(json);
-        return json;
-      });
-
-    return data;
+    ).then((response) => {
+      console.log('Fetch is successful');
+      return response.json();
+    });
   }
+
+  async function storeMediaItems(mediaItems, dbPromise) {
+    const db = await dbPromise;
+    
+    const tx = db.transaction('localMediaItems', 'readwrite');
+    const storeAddPromiseArray = mediaItems.map((value) => {
+      return new Promise((resolve, reject) => {
+        resolve(tx.store.put(value));
+      });
+    });
+    // await Promise.all([...storeAddPromiseArray, tx.done]);
+  }
+
+  // must run after the log-in is completed
+  const handleRequest = (token) => {
+    console.log('handleRequest is called');
+    const GoogleAuth = window.gapi.auth2.getAuthInstance();
+    const user = GoogleAuth.currentUser.get();
+    console.log(dbPromise);
+
+    // fetch data from Google API
+    let test;
+    getAPageOfMediaItems(token).then((response) => {
+      console.log(response);
+      // put all media items in the database
+      storeMediaItems(response.mediaItems, dbPromise);
+    });
+
+    console.log('returned test: ' + test);
+
+    // store data to the database 'LocalMediaItems'
+
+    // retrieve data from database
+  };
 
   return (
     <React.Fragment>
