@@ -131,36 +131,45 @@ export default function MyAppBar() {
         })}
       >
         <Toolbar>
-          <Grid
-            container
-            justify='flex-start'
-            alignItems='center'
-            direction='row'
-          >
-            <IconButton
-              color='inherit'
-              aria-label='open drawer'
-              onClick={handleDrawerOpen}
-              edge='start'
-              className={clsx(classes.menuButton, isOpen && classes.hide)}
+          <Grid container alignItems='center'
+              justify='flex-start'
+              direction='row'>
+            <Grid container item justify='flex-start' alignItems='center' direction='row' lg={3} xs={12}>
+              <IconButton
+                color='inherit'
+                aria-label='open drawer'
+                onClick={handleDrawerOpen}
+                edge='start'
+                className={clsx(classes.menuButton, isOpen && classes.hide)}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography variant='h6'>
+                Google Photos Search Enhancer
+              </Typography>
+            </Grid>
+            <Grid container item
+              alignItems='center'
+              justify='flex-start'
+              direction='row'
+              lg={7}
+              xs={12}>
+              <SearchBar />
+            </Grid>
+            <Grid
+              container
+              item
+              alignItems='center'
+              justify='flex-end'
+              direction='row'
+              lg={2}
+              xs={12}
             >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant='h6'>Google Photos Search Enhancer</Typography>
-            <SearchBar />
-          </Grid>
-          <Grid
-            container
-            alignItems='center'
-            justify='flex-end'
-            direction='row'
-            lg={2}
-            xs={12}
-          >
-            <GoogleBtn
-              onLastUpdateTime={() => setLastUpdateTime(getTimeStamp())}
-              lastUpdateTime={lastUpdateTime}
-            />
+              <GoogleBtn
+                onLastUpdateTime={() => setLastUpdateTime(getTimeStamp())}
+                lastUpdateTime={lastUpdateTime}
+              />
+            </Grid>
           </Grid>
         </Toolbar>
       </AppBar>
