@@ -1,8 +1,7 @@
 import CssBaseline from '@material-ui/core/CssBaseline';
 import React, { Component } from 'react';
 import Photos from './Photos/Photos';
-import SearchBar from './SearchBar';
-import TitleComponent from './TitleComponent';
+import MyAppBar from './MyAppBar';
 import GoogleBtn from './GoogleBtn';
 import * as GapiConnection from './GapiConnection';
 
@@ -27,10 +26,7 @@ export default class App extends Component {
     return (
       <div>
         <CssBaseline />
-
-        <TitleComponent />
-        <GoogleBtn />
-        <SearchBar />
+        <MyAppBar />
         <Photos />
       </div>
     )

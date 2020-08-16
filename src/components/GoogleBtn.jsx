@@ -1,10 +1,10 @@
 /* global gapi */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import * as credentials from './credentials.json';
-import dbPromise from './IndexedDB';
-import * as GapiConnection from './GapiConnection';
+import { getTimeStamp } from './IndexedDBController';
+import { requestAllMediaItems, requestNewMediaItems } from './GapiConnection';
 
 const oauth2 = {
   clientID: credentials.web.client_id,
@@ -24,15 +24,17 @@ const oauth2 = {
 //   },
 // });
 
-export default function GoogleBtn() {
+export default function GoogleBtn(props) {
   // const classes = useStyles();
   const [isLogined, setIsLogined] = useState(false);
   const [accessToken, setAccessToken] = useState('');
+  
 
   const login = (response) => {
     if (response.accessToken) {
       setIsLogined(true);
       setAccessToken(response.accessToken);
+      // start request
       handleRequest(response.accessToken);
     }
   };
@@ -48,90 +50,25 @@ export default function GoogleBtn() {
     alert('Failed to log out');
   };
 
-  // return an init object for Fetch
-  const createFetchInit = (accessToken, httpMethod) => {
-    let myHeaders = new Headers();
-    myHeaders.append('Content-Type', 'application/json');
-    myHeaders.append('Authorization', `Bearer ${accessToken}`);
-    const myInit = {
-      method: httpMethod,
-      headers: myHeaders,
-      mode: 'cors',
-      cache: 'default',
-    };
-
-    return myInit;
-  };
-
-  const createRequest = (accessToken, apiURL, pageToken) => {
-    let url;
-    if (pageToken) {
-      url = `${apiURL}?access_token=${accessToken}&pageSize=100&pageToken=${pageToken}`;
-    } else {
-      url = `${apiURL}?access_token=${accessToken}&pageSize=100`;
-    }
-    return new Request(url);
-  };
-
-  // request for all media items and store the result in the IndexedDB
-  async function getAllMediaItems(accessToken) {
-    let nextToken;
-    // fetch a page of data from Google API
-    let onePageData = await getAPageOfMediaItems(accessToken);
-    nextToken = onePageData.nextPageToken;
-
-    while (nextToken) {
-      // use the nextPageToken to get the data in the next page
-      nextToken = onePageData.nextPageToken;
-      const storingData = onePageData.mediaItems;
-      storeMediaItems(storingData, dbPromise);
-      onePageData = await getAPageOfMediaItems(accessToken, nextToken);
-
-      // await onePageData
-      //   .then(function fulfilled(onePageData) {
-      //     nextToken = onePageData.nextPageToken;
-      //     storeMediaItems(onePageData.mediaItems, dbPromise);
-      //     return nextToken;
-      //   })
-      //   .then(function fulfilled(nextToken) {
-      //     onePageData = getAPageOfMediaItems(nextToken);
-      //   });
-    }
-  }
-
-  // return a Promise wrapping the response JSON
-  function getAPageOfMediaItems(accessToken, pageToken) {
-    const request = createRequest(accessToken, 'https://photoslibrary.googleapis.com/v1/mediaItems', pageToken);
-    const myInit = createFetchInit(accessToken, 'GET');
-    return fetch(request, myInit)
-      .then((response) => {
-        console.log('Fetch is successful');
-        return response.json();
-      })
-      .catch((reject) => {
-        console.log('Rejected' + reject);
-      });
-  }
-
-  async function storeMediaItems(mediaItems, dbPromise) {
-    const db = await dbPromise;
-    const tx = db.transaction('localMediaItems', 'readwrite');
-    mediaItems.forEach((value) => {
-      return new Promise((resolve, reject) => {
-        resolve(tx.store.put(value));
-      }).catch((error) => {
-        console.log('Error: failed to store data in IndexedDB' + error);
-      });
-    });
-  }
-
   // must run after the log-in is completed
   const handleRequest = (accessToken) => {
     console.log('handleRequest is called');
     const GoogleAuth = window.gapi.auth2.getAuthInstance();
     const user = GoogleAuth.currentUser.get();
 
-    getAllMediaItems(accessToken);
+    // If the user login, and IndexedDB has no data currently
+    // getAPageOfMediaItems(accessToken);
+    if (!getTimeStamp()) {
+      requestAllMediaItems(accessToken).then((fulfilled) => {
+        // Update the LastUpdateView
+        props.onLastUpdateTime();
+      });
+    }
+    else {
+      requestNewMediaItems(accessToken).then((fulfilled) => {
+        props.onLastUpdateTime();
+      });
+    }
     // retrieve data from database
   };
 
