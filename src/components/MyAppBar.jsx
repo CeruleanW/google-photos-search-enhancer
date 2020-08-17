@@ -15,10 +15,11 @@ import SearchBar from './SearchBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid, Button, Container } from '@material-ui/core';
 import { clearData } from './IndexedDBController';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { storeMediaItems, getTimeStamp } from './IndexedDBController';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 export default function MyAppBar() {
   const drawerWidth = 240;
@@ -63,12 +64,7 @@ export default function MyAppBar() {
     },
     content: {
       flexGrow: 1,
-      padding: theme.spacing(3),
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      marginLeft: -drawerWidth,
+      padding: theme.spacing(2),
     },
     contentShift: {
       transition: theme.transitions.create('margin', {
@@ -77,10 +73,23 @@ export default function MyAppBar() {
       }),
       marginLeft: 0,
     },
+    title: {
+      [theme.breakpoints.down('xs')]: {
+        fontSize: '1rem',
+      },
+      [theme.breakpoints.up('lg')]: {
+        fontSize: '1.2rem',
+      },
+    },
   }));
-
+  
   const classes = useStyles();
   const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.up('md'));
+  let justifyStyle;
+  matches ? justifyStyle='flex-end' : justifyStyle='center';
+
+
   const [isOpen, setIsOpen] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
 
@@ -121,6 +130,7 @@ export default function MyAppBar() {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
+
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -131,10 +141,16 @@ export default function MyAppBar() {
         })}
       >
         <Toolbar>
-          <Grid container alignItems='center'
+          <Grid container alignItems='center' justify='flex-start' spacing={1}>
+            <Grid
+              container
+              item
               justify='flex-start'
-              direction='row'>
-            <Grid container item justify='flex-start' alignItems='center' direction='row' lg={3} xs={12}>
+              alignItems='center'
+              lg={4}
+              md={5}
+              xs={12}
+            >
               <IconButton
                 color='inherit'
                 aria-label='open drawer'
@@ -144,26 +160,29 @@ export default function MyAppBar() {
               >
                 <MenuIcon />
               </IconButton>
-              <Typography variant='h6'>
+              <Typography variant='h6' className={classes.title}>
                 Google Photos Search Enhancer
               </Typography>
             </Grid>
-            <Grid container item
+            <Grid
+              container
+              item
               alignItems='center'
               justify='flex-start'
-              direction='row'
-              lg={7}
-              xs={12}>
+              lg={5}
+              md={6}
+              xs={12}
+            >
               <SearchBar />
             </Grid>
             <Grid
               container
               item
               alignItems='center'
-              justify='flex-end'
-              direction='row'
-              lg={2}
+              justify={justifyStyle}
               xs={12}
+              md={1}
+              lg={3}
             >
               <GoogleBtn
                 onLastUpdateTime={() => setLastUpdateTime(getTimeStamp())}
@@ -207,12 +226,13 @@ export default function MyAppBar() {
             <ListItemText primary='Stop' />
           </ListItem>
         </List>
-        <Box>
-          <Typography variant='subtitle1' display='block' gutterBottom>
-            Last Update:{' '}
+        <Divider/>
+          <Typography variant='subtitle1' display='block' gutterBottom className={classes.content} color='textSecondary'>
+            <Box>
+              Last Update:
+            </Box>
             {lastUpdateTime ? formatDate(lastUpdateTime) : 'No data'}
           </Typography>
-        </Box>
       </Drawer>
     </div>
   );

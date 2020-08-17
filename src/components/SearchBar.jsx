@@ -2,7 +2,7 @@ import React from 'react';
 import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
 import { makeStyles, fade } from '@material-ui/core/styles';
-import { Button } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   search: {
@@ -14,9 +14,11 @@ const useStyles = makeStyles((theme) => ({
     },
     marginRight: theme.spacing(2),
     marginLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(3),
+    // width: '100%',
+    // marginBottom: theme.spacing(1),
+    [theme.breakpoints.up('md')]: {
+      // marginLeft: theme.spacing(3),
+      marginBottom: theme.spacing(0),
       width: 'auto',
     },
   },
@@ -38,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
     // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
     transition: theme.transitions.create('width'),
-    width: '100%',
+    // width: '70%',
     [theme.breakpoints.up('md')]: {
       width: '20ch',
     },
@@ -48,12 +50,12 @@ const useStyles = makeStyles((theme) => ({
 export default function SearchBar() {
   const classes = useStyles();
   const handleSearch = (event) => {
-    // 
+    //
   };
 
   return (
     <React.Fragment>
-      <div className={classes.search}>
+      <Grid className={classes.search} item xs={9}>
         <div className={classes.searchIcon}>
           <SearchIcon />
         </div>
@@ -65,11 +67,12 @@ export default function SearchBar() {
           }}
           inputProps={{ 'aria-label': 'search' }}
         />
-      </div>
-      
-      <Button variant='contained' color='primary' onClick={handleSearch}>
-        Search
-      </Button>
+      </Grid>
+      <Grid item>
+        <Button variant='contained' onClick={handleSearch}>
+          Search
+        </Button>
+      </Grid>
     </React.Fragment>
   );
 }

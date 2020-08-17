@@ -5,6 +5,7 @@ import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import * as credentials from './credentials.json';
 import { getTimeStamp } from './IndexedDBController';
 import { requestAllMediaItems, requestNewMediaItems } from './GapiConnection';
+import { Button } from '@material-ui/core';
 
 const oauth2 = {
   clientID: credentials.web.client_id,
@@ -80,7 +81,11 @@ export default function GoogleBtn(props) {
           onLogoutSuccess={logout}
           buttonText='Logout'
           onFailure={handleLogoutFailure}
-        ></GoogleLogout>
+          render={renderProps => (
+            <Button variant='contained' onClick={renderProps.onClick} disabled={renderProps.disabled} >Logout</Button>
+          )}
+          cookiePolicy={'single_host_origin'}
+        />
       ) : (
         <GoogleLogin
           clientId={oauth2.clientID}
@@ -90,6 +95,9 @@ export default function GoogleBtn(props) {
           responseType='code,token'
           scope={oauth2.scopes[1]}
           isSignedIn={true}
+          render={renderProps => (
+            <Button variant='contained' onClick={renderProps.onClick} disabled={renderProps.disabled} >Login</Button>
+          )}
         />
       )}
     </React.Fragment>
