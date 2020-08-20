@@ -28,13 +28,12 @@ const oauth2 = {
 export default function GoogleBtn(props) {
   // const classes = useStyles();
   const [isLogined, setIsLogined] = useState(false);
-  const [accessToken, setAccessToken] = useState('');
   
-
+  // login, get the access token
   const login = (response) => {
     if (response.accessToken) {
       setIsLogined(true);
-      setAccessToken(response.accessToken);
+      props.onAccessToken(response.accessToken);
       // start request
       handleRequest(response.accessToken);
     }
@@ -42,7 +41,7 @@ export default function GoogleBtn(props) {
 
   const logout = (response) => {
     setIsLogined(false);
-    setAccessToken('');
+    props.onAccessToken('');
   };
   const handleLoginFailure = (response) => {
     alert('Failed to log in');
@@ -57,15 +56,14 @@ export default function GoogleBtn(props) {
     const GoogleAuth = window.gapi.auth2.getAuthInstance();
     const user = GoogleAuth.currentUser.get();
 
-    // If the user login, and IndexedDB has no data currently
-    // getAPageOfMediaItems(accessToken);
+    // If it's the first time that the user login
     if (!getTimeStamp()) {
       requestAllMediaItems(accessToken).then((fulfilled) => {
         // Update the LastUpdateView
         props.onLastUpdateTime();
       });
     }
-    else {
+    else { //get new items since last update
       requestNewMediaItems(accessToken).then((fulfilled) => {
         props.onLastUpdateTime();
       });

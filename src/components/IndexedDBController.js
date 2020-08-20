@@ -2,6 +2,21 @@ import { openDB } from 'idb';
 import React from 'react';
 
 let dbPromise;
+createDatabase();
+
+export function setTimeStamp(value = true) {
+  if (value) {
+    localStorage.setItem('updateTime', new Date());
+  }
+  else {
+    localStorage.setItem('updateTime', '');
+  }
+}
+// return a date object or a empty string
+export function getTimeStamp() {
+  return localStorage.getItem('updateTime');
+}
+
 // Create a database with a 'localMediaItems' object store
 export function createDatabase() {
   dbPromise = openDB('db', 1, {
@@ -12,14 +27,9 @@ export function createDatabase() {
       });
     },
   });
-  localStorage.setItem('updateTime', new Date());
+  setTimeStamp();
 
   return dbPromise;
-}
-
-export async function getDatabase() {
-  const db = await dbPromise;
-  return db;
 }
 
 export async function storeMediaItems(mediaItems) {
@@ -39,15 +49,33 @@ export async function clearData() {
   db.clear('localMediaItems');
 }
 
-export function setTimeStamp() {
-  localStorage.setItem('updateTime', new Date());
+
+export function storeGridImages(baseUrl) {
+
 }
 
-export function getTimeStamp() {
-  return new Date(localStorage.getItem('updateTime'));
-}
-// get specific data
+// search a keyword and return an array of matched Ids(keys)
+export async function search(keyword) {
+    console.log('Keyword:' + keyword);
 
-// search and return
+    // request data from IndexedDB
+    const db = await dbPromise;
+    let store = db.transaction('localMediaItems').store;
+    let cursor = await store.openCursor();
+    let result = [];
+
+    // loop through each media items
+    while (cursor) {
+      let des = cursor.value.description;
+      if (des && des.includes(keyword)) {
+        result.push(cursor.key);
+      }
+      cursor = await cursor.continue();
+    }
+    // if (result.length === 0) {
+    //   return null;
+    // }
+    return result;
+}
 
 export default function IndexedDB() {}

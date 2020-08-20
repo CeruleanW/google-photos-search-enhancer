@@ -15,13 +15,14 @@ import SearchBar from './SearchBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { Box, Grid, Button, Container } from '@material-ui/core';
 import { clearData } from './IndexedDBController';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { storeMediaItems, getTimeStamp } from './IndexedDBController';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { storeMediaItems, getTimeStamp, setTimeStamp } from './IndexedDBController';
+import { requestAllMediaItems, requestNewMediaItems} from './GapiConnection';
 
-export default function MyAppBar() {
+export default function MyAppBar(props) {
   const drawerWidth = 240;
   const useStyles = makeStyles((theme) => ({
     root: {
@@ -89,21 +90,30 @@ export default function MyAppBar() {
   let justifyStyle;
   matches ? justifyStyle='flex-end' : justifyStyle='center';
 
-
   const [isOpen, setIsOpen] = useState(false);
-  const [lastUpdateTime, setLastUpdateTime] = useState(null);
+  const [lastUpdateTime, setLastUpdateTime] = useState('');
+  const [accessToken, setAccessToken] = useState('');
 
   const handleDrawerOpen = () => {
     setIsOpen(true);
   };
-
   const handleDrawerClose = () => {
     setIsOpen(false);
   };
 
   const handleClear = () => {
     clearData();
+    setTimeStamp('');
+    setLastUpdateTime(getTimeStamp());
   };
+  
+  const handleUpdate = () => {
+    requestAllMediaItems(accessToken).then((fulfilled) => {
+      console.log('Update completed!');
+      // Update the LastUpdateView
+      setLastUpdateTime(getTimeStamp());
+    });
+  }
 
   const getNewLastUpdateTime = () => {
     setLastUpdateTime(getTimeStamp());
@@ -130,6 +140,9 @@ export default function MyAppBar() {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
+  const getAccessTokenFromGoogleBtn = (token) => {
+    setAccessToken(token);
+  }
 
   return (
     <div className={classes.root}>
@@ -173,7 +186,7 @@ export default function MyAppBar() {
               md={6}
               xs={12}
             >
-              <SearchBar />
+              <SearchBar accessToken={accessToken} onPhotos={props.onPhotos} />
             </Grid>
             <Grid
               container
@@ -187,6 +200,7 @@ export default function MyAppBar() {
               <GoogleBtn
                 onLastUpdateTime={() => setLastUpdateTime(getTimeStamp())}
                 lastUpdateTime={lastUpdateTime}
+                onAccessToken={getAccessTokenFromGoogleBtn}
               />
             </Grid>
           </Grid>
@@ -214,7 +228,7 @@ export default function MyAppBar() {
         <Divider />
         <List>
           <ListItem button>
-            <ListItemText primary='Update data' />
+            <ListItemText primary='Update data' onClick={handleUpdate} />
           </ListItem>
           <ListItem button>
             <ListItemText primary='Clear data' onClick={handleClear} />

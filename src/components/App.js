@@ -1,14 +1,15 @@
 import CssBaseline from '@material-ui/core/CssBaseline';
 import React, { Component } from 'react';
-import Photos from './Photos/Photos';
 import MyAppBar from './MyAppBar';
 import GoogleBtn from './GoogleBtn';
 import * as GapiConnection from './GapiConnection';
+import Photos from './Photos/Photos';
 
 export default class App extends Component {
   constructor(props) {
     super(props);
-    // this.state = {};
+    this.state = {photoUrls: []};
+    this.handlePhotos = this.handlePhotos.bind(this);
   }
 
   componentDidMount() {
@@ -22,12 +23,16 @@ export default class App extends Component {
     // display some recent photos(indicate success)
   }
 
+  handlePhotos(baseUrls) {
+    this.setState({photoUrls: baseUrls});
+  }
+
   render() {
     return (
       <div>
         <CssBaseline />
-        <MyAppBar />
-        <Photos />
+        <MyAppBar onPhotos={this.handlePhotos}/>
+        <Photos photoUrls={this.state.photoUrls}></Photos>
       </div>
     )
   }
