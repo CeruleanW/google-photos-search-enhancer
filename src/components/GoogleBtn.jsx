@@ -6,6 +6,7 @@ import * as credentials from './credentials.json';
 import { getTimeStamp } from './IndexedDBController';
 import { requestAllMediaItems, requestNewMediaItems } from './GapiConnection';
 import { Button } from '@material-ui/core';
+import { useAccessTokenUpdate } from './AccessContext';
 
 const oauth2 = {
   clientID: credentials.web.client_id,
@@ -18,22 +19,16 @@ const oauth2 = {
   ],
 };
 
-// const useStyles = makeStyles({
-//   gSignin2: {},
-//   icon: {
-//     maxWidth: '32px',
-//   },
-// });
-
 export default function GoogleBtn(props) {
   // const classes = useStyles();
   const [isLogined, setIsLogined] = useState(false);
+  const updateAccessToken = useAccessTokenUpdate();
   
   // login, get the access token
   const login = (response) => {
     if (response.accessToken) {
       setIsLogined(true);
-      props.onAccessToken(response.accessToken);
+      updateAccessToken(response.accessToken);
       // start request
       handleRequest(response.accessToken);
     }

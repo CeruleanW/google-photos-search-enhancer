@@ -3,8 +3,9 @@ import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
 import { makeStyles, fade } from '@material-ui/core/styles';
 import { Button, Grid } from '@material-ui/core';
-import { search } from './IndexedDBController';
-import {requestForBaseUrls} from './GapiConnection';
+import { search, getProductUrl } from './IndexedDBController';
+import { requestForSingleItem } from './GapiConnection';
+import { useAccessToken } from './AccessContext';
 
 const useStyles = makeStyles((theme) => ({
   search: {
@@ -51,9 +52,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SearchBar(props) {
   const classes = useStyles();
+  const accessToken = useAccessToken();
   const [keyword, setKeyword] = useState('');
 
-  // Search the local IndexedDB by the keyword in state, display the results
+  // Search the local IndexedDB by the keyword in state, pass the base urls to Photos
   const handleSearch = () => {
     if (!keyword) {return false}
     // pass keyword to search media items from IndexedDB
@@ -61,17 +63,22 @@ export default function SearchBar(props) {
     search(keyword).then( (fulfilled) => {
       console.log(fulfilled);
       const ids = fulfilled; 
-      // request for baseUrls
-      requestForBaseUrls(ids, props.accessToken).then(
+
+      // return the base urls and the product urls
+      requestForSingleItem(ids, accessToken).then(
         (baseUrls) => {
           console.log(baseUrls);
           // send the base urls in response to App
           props.onPhotos(baseUrls);
         }
       );
-    }).catch( rejected => console.log('Error: ' + rejected));
+      // get the product urls
+      // getProductUrl(ids).then(
 
+      // );
+    }).catch( rejected => console.log('Error: ' + rejected));
   };
+  
   const handleKeywordChange = (event) => {
     setKeyword(event.target.value);
   }

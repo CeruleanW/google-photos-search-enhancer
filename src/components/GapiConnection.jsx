@@ -4,7 +4,19 @@ import {
   setTimeStamp,
   getTimeStamp,
 } from './IndexedDBController';
-import React, { useState } from 'react';
+
+const createBaseInit = (accessToken) => {
+  let myHeaders = {};
+  Object.assign(myHeaders, { 'Content-Type': 'application/json' });
+  Object.assign(myHeaders, { Authorization: `Bearer ${accessToken}` });
+
+  const baseInit = {
+    headers: myHeaders,
+    mode: 'no-cors',
+  };
+
+  return baseInit;
+};
 
 // return an init object for Fetch
 const createInit = (
@@ -14,10 +26,9 @@ const createInit = (
   filters = { includeArchivedMedia: true },
   pageSize = 100
 ) => {
-  let myHeaders = {};
-  Object.assign(myHeaders, { 'Content-Type': 'application/json' });
-  Object.assign(myHeaders, { Authorization: `Bearer ${accessToken}` });
+  let init = createBaseInit(accessToken);
 
+  // create body
   let body = {
     filters,
     pageSize,
@@ -29,14 +40,9 @@ const createInit = (
 
   body = JSON.stringify(body);
 
-  const myInit = {
-    method: httpMethod,
-    headers: myHeaders,
-    mode: 'cors',
-    body,
-  };
+  Object.assign(init, { method: httpMethod, mode: 'cors', body });
 
-  return myInit;
+  return init;
 };
 
 const createRequest = (
@@ -54,11 +60,11 @@ const createRequestForSingleItem = (url, accessToken) => {
   return `${url}?access_token=${accessToken}`;
 };
 
-function objectToQueryString(obj) {
+const objectToQueryString = (obj) => {
   return Object.keys(obj)
     .map((key) => key + '=' + obj[key])
     .join('&');
-}
+};
 
 // request for all media items and store the result in the IndexedDB
 // return the setted time stamp
@@ -123,7 +129,7 @@ export async function requestNewMediaItems(accessToken) {
 }
 
 // return a Promise with the fulfilled value is an array of baseUrls
-export async function requestForBaseUrls(ids, accessToken) {
+export async function requestForSingleItem(ids, accessToken) {
   // set a list of requests
   const urls = ids.map(
     (id) => `https://photoslibrary.googleapis.com/v1/mediaItems/${id}`
@@ -140,26 +146,22 @@ export async function requestForBaseUrls(ids, accessToken) {
   });
 }
 
-// return a list of blobs
-export async function requestImages(urls) {
+// take a list of base urls, return a list of image blob urls
+export async function requestImages(urls, accessToken) {
   let data = [];
+  const simpleOptions = createBaseInit(accessToken);
   // fetch each url and push the blob in response to data
   await urls.forEach((url) => {
-    fetch(url)
+    fetch(url, simpleOptions)
       .then((response) => {
-        response.blob();
-      })
-      .then((blobResponse) => {
+        const blobResponse = response.blob();
         data.push(blobResponse);
-      });
+      })
+      .catch((error) => console.log(error));
   });
 
   const urlCreator = window.URL || window.webkitURL;
   const result = data.map((blob) => urlCreator.createObjectURL(blob));
 
   return result;
-}
-
-export default function GapiConnection(props) {
-  return;
 }

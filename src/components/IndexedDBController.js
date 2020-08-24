@@ -49,11 +49,6 @@ export async function clearData() {
   db.clear('localMediaItems');
 }
 
-
-export function storeGridImages(baseUrl) {
-
-}
-
 // search a keyword and return an array of matched Ids(keys)
 export async function search(keyword) {
     console.log('Keyword:' + keyword);
@@ -76,6 +71,13 @@ export async function search(keyword) {
     //   return null;
     // }
     return result;
+}
+
+export async function getProductUrl(ids) {
+  const db = await dbPromise;
+  const store = db.transaction('localMediaItems').store;
+  const values = await ids.map( id => db.getFromIndex('localMediaItems', 'id', id) );
+  return ;
 }
 
 export default function IndexedDB() {}

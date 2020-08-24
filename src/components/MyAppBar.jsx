@@ -21,13 +21,11 @@ import { clearData } from './IndexedDBController';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { storeMediaItems, getTimeStamp, setTimeStamp } from './IndexedDBController';
 import { requestAllMediaItems, requestNewMediaItems} from './GapiConnection';
+import { useAccessToken } from './AccessContext';
 
 export default function MyAppBar(props) {
   const drawerWidth = 240;
   const useStyles = makeStyles((theme) => ({
-    root: {
-      display: 'flex',
-    },
     appBar: {
       transition: theme.transitions.create(['margin', 'width'], {
         easing: theme.transitions.easing.sharp,
@@ -82,6 +80,7 @@ export default function MyAppBar(props) {
         fontSize: '1.2rem',
       },
     },
+    offset: theme.mixins.toolbar,
   }));
   
   const classes = useStyles();
@@ -90,9 +89,9 @@ export default function MyAppBar(props) {
   let justifyStyle;
   matches ? justifyStyle='flex-end' : justifyStyle='center';
 
+  const accessToken = useAccessToken();
   const [isOpen, setIsOpen] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState('');
-  const [accessToken, setAccessToken] = useState('');
 
   const handleDrawerOpen = () => {
     setIsOpen(true);
@@ -140,15 +139,11 @@ export default function MyAppBar(props) {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
-  const getAccessTokenFromGoogleBtn = (token) => {
-    setAccessToken(token);
-  }
-
   return (
-    <div className={classes.root}>
+    <div>
       <CssBaseline />
       <AppBar
-        position='fixed'
+        position="sticky"
         className={clsx(classes.appBar, {
           [classes.appBarShift]: isOpen,
         })}
@@ -186,7 +181,7 @@ export default function MyAppBar(props) {
               md={6}
               xs={12}
             >
-              <SearchBar accessToken={accessToken} onPhotos={props.onPhotos} />
+              <SearchBar onPhotos={props.onPhotos} />
             </Grid>
             <Grid
               container
@@ -200,13 +195,14 @@ export default function MyAppBar(props) {
               <GoogleBtn
                 onLastUpdateTime={() => setLastUpdateTime(getTimeStamp())}
                 lastUpdateTime={lastUpdateTime}
-                onAccessToken={getAccessTokenFromGoogleBtn}
               />
             </Grid>
           </Grid>
         </Toolbar>
       </AppBar>
-
+      {/* <div className={classes.offset} /> */}
+      {/* <Box></Box> */}
+      {/* <Toolbar /> */}
       <Drawer
         className={classes.drawer}
         variant='persistent'

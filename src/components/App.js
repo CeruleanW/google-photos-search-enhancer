@@ -1,39 +1,38 @@
 import CssBaseline from '@material-ui/core/CssBaseline';
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import MyAppBar from './MyAppBar';
-import GoogleBtn from './GoogleBtn';
 import * as GapiConnection from './GapiConnection';
 import Photos from './Photos/Photos';
+import { makeStyles } from "@material-ui/core/";
 
-export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {photoUrls: []};
-    this.handlePhotos = this.handlePhotos.bind(this);
-  }
 
-  componentDidMount() {
-    // load gapi
-    // googleAPI.loadApi();
-    // instantiate the network request
-    // show the loading modal
-    // When connection is successful
-    // - set state to isConnected
-    // get all the meta data from Google Photos
-    // display some recent photos(indicate success)
-  }
+// load gapi
+// googleAPI.loadApi();
+// instantiate the network request
+// show the loading modal
+// When connection is successful
+// - set state to isConnected
+// get all the meta data from Google Photos
+// display some recent photos(indicate success)
 
-  handlePhotos(baseUrls) {
-    this.setState({photoUrls: baseUrls});
-  }
+const useStyles = makeStyles(theme => ({
+  offset: theme.mixins.toolbar,
+}))
 
-  render() {
-    return (
-      <div>
-        <CssBaseline />
-        <MyAppBar onPhotos={this.handlePhotos}/>
-        <Photos photoUrls={this.state.photoUrls}></Photos>
-      </div>
-    )
-  }
+export default function App(props) {
+  const [photoUrls, setPhotoUrls] = useState([]);
+  const classes = useStyles();
+
+  const handlePhotos = (baseUrls) => {
+    setPhotoUrls(baseUrls);
+  };
+
+  return (
+    <div>
+      <CssBaseline />
+      <MyAppBar onPhotos={handlePhotos}/>
+      {/* <div className={classes.offset} /> */}
+      <Photos photoUrls={photoUrls} ></Photos>
+    </div>
+  );
 }
