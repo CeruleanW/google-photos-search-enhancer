@@ -3,9 +3,10 @@ import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
 import { makeStyles, fade } from '@material-ui/core/styles';
 import { Button, Grid } from '@material-ui/core';
-import { search, getProductUrl } from './IndexedDBController';
+import { search } from './IndexedDBController';
 import { requestForSingleItem } from './GapiConnection';
 import { useAccessToken } from './AccessContext';
+import { usePhotoUrlUpdate } from './UrlsContext';
 
 const useStyles = makeStyles((theme) => ({
   search: {
@@ -50,9 +51,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SearchBar(props) {
+export default function SearchBar() {
   const classes = useStyles();
   const accessToken = useAccessToken();
+  const updatePhotoUrlUpdate = usePhotoUrlUpdate();
   const [keyword, setKeyword] = useState('');
 
   // Search the local IndexedDB by the keyword in state, pass the base urls to Photos
@@ -66,19 +68,16 @@ export default function SearchBar(props) {
 
       // return the base urls and the product urls
       requestForSingleItem(ids, accessToken).then(
-        (baseUrls) => {
-          console.log(baseUrls);
+        (urls) => {
+          console.log(urls);
           // send the base urls in response to App
-          props.onPhotos(baseUrls);
+          // props.onPhotos(urls);
+          updatePhotoUrlUpdate(urls);
         }
       );
-      // get the product urls
-      // getProductUrl(ids).then(
-
-      // );
     }).catch( rejected => console.log('Error: ' + rejected));
   };
-  
+
   const handleKeywordChange = (event) => {
     setKeyword(event.target.value);
   }

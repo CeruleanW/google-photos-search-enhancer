@@ -84,18 +84,18 @@ export async function requestAllMediaItems(
   );
   nextToken = onePageData.nextPageToken;
 
-  while (nextToken) {
+  do {
+    const storedData = filterResponseData(onePageData);
+    storeMediaItems(storedData);
     // use the nextPageToken to get the data in the next page
     nextToken = onePageData.nextPageToken;
-    const storingData = onePageData.mediaItems;
-    storeMediaItems(storingData);
     onePageData = await requestAPageOfMediaItems(
       accessToken,
       nextToken,
       url,
       httpMethod
     );
-  }
+  } while (nextToken);
 
   setTimeStamp(new Date());
   return getTimeStamp();
@@ -128,7 +128,7 @@ export async function requestNewMediaItems(accessToken) {
   return getTimeStamp();
 }
 
-// return a Promise with the fulfilled value is an array of baseUrls
+// return a Promise with the fulfilled value is an array of object, which has 2 property: baseUrl & productUrl
 export async function requestForSingleItem(ids, accessToken) {
   // set a list of requests
   const urls = ids.map(
@@ -140,9 +140,14 @@ export async function requestForSingleItem(ids, accessToken) {
   const fetches = requests.map((request) =>
     fetch(request).then((fulfilled) => fulfilled.json())
   );
-  // send request and get baseUrls
+
   return await Promise.all(fetches).then((fulfilleds) => {
-    return fulfilleds.map((fulfilled) => fulfilled.baseUrl);
+    const resultUrls = fulfilleds.map((fulfilled) => {
+      const baseUrl = fulfilled.baseUrl;
+      const productUrl = fulfilled.productUrl;
+      return { baseUrl, productUrl };
+    });
+    return resultUrls;
   });
 }
 
@@ -164,4 +169,11 @@ export async function requestImages(urls, accessToken) {
   const result = data.map((blob) => urlCreator.createObjectURL(blob));
 
   return result;
+}
+
+function filterResponseData(responseJson) {
+  return responseJson.mediaItems.map((mediaItem) => {
+    const { id, productUrl, filename, description } = mediaItem;
+    return { id, productUrl, filename, description };
+  });
 }

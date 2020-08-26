@@ -16,14 +16,17 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { Box, Grid, Button, Container } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import { clearData } from './IndexedDBController';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { storeMediaItems, getTimeStamp, setTimeStamp } from './IndexedDBController';
-import { requestAllMediaItems, requestNewMediaItems} from './GapiConnection';
+import { getTimeStamp, setTimeStamp } from './IndexedDBController';
+import { requestAllMediaItems, requestNewMediaItems } from './GapiConnection';
 import { useAccessToken } from './AccessContext';
+import { useFeedbackUpdate } from './FeedbackContext';
+import Snackbar from '@material-ui/core/Snackbar';
 
-export default function MyAppBar(props) {
+export default function MyAppBar() {
+  // Styles
   const drawerWidth = 240;
   const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -82,16 +85,18 @@ export default function MyAppBar(props) {
     },
     offset: theme.mixins.toolbar,
   }));
-  
   const classes = useStyles();
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up('md'));
   let justifyStyle;
-  matches ? justifyStyle='flex-end' : justifyStyle='center';
+  matches ? (justifyStyle = 'flex-end') : (justifyStyle = 'center');
 
   const accessToken = useAccessToken();
+  const updateFeedback = useFeedbackUpdate();
+
   const [isOpen, setIsOpen] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState('');
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
 
   const handleDrawerOpen = () => {
     setIsOpen(true);
@@ -105,14 +110,26 @@ export default function MyAppBar(props) {
     setTimeStamp('');
     setLastUpdateTime(getTimeStamp());
   };
-  
+
+  const handleSnackbarClose = () => {setIsSnackbarOpen(false)};
+
   const handleUpdate = () => {
-    requestAllMediaItems(accessToken).then((fulfilled) => {
-      console.log('Update completed!');
-      // Update the LastUpdateView
-      setLastUpdateTime(getTimeStamp());
-    });
-  }
+    updateFeedback.handleBackdrop(true);
+    updateFeedback.handleTextMessage('Updating local data... Please wait for a while');
+    requestAllMediaItems(accessToken)
+      .then((fulfilled) => {
+        console.log('Update completed!');
+        setIsSnackbarOpen(true);
+        // Update the LastUpdateView
+        setLastUpdateTime(getTimeStamp());
+      })
+      .finally(() => {
+        updateFeedback.handleBackdrop(false);
+        updateFeedback.handleTextMessage('');
+        setIsSnackbarOpen(false);
+      });
+  };
+
 
   const getNewLastUpdateTime = () => {
     setLastUpdateTime(getTimeStamp());
@@ -143,7 +160,7 @@ export default function MyAppBar(props) {
     <div>
       <CssBaseline />
       <AppBar
-        position="sticky"
+        position='sticky'
         className={clsx(classes.appBar, {
           [classes.appBarShift]: isOpen,
         })}
@@ -181,7 +198,7 @@ export default function MyAppBar(props) {
               md={6}
               xs={12}
             >
-              <SearchBar onPhotos={props.onPhotos} />
+              <SearchBar />
             </Grid>
             <Grid
               container
@@ -200,9 +217,6 @@ export default function MyAppBar(props) {
           </Grid>
         </Toolbar>
       </AppBar>
-      {/* <div className={classes.offset} /> */}
-      {/* <Box></Box> */}
-      {/* <Toolbar /> */}
       <Drawer
         className={classes.drawer}
         variant='persistent'
@@ -236,14 +250,26 @@ export default function MyAppBar(props) {
             <ListItemText primary='Stop' />
           </ListItem>
         </List>
-        <Divider/>
-          <Typography variant='subtitle1' display='block' gutterBottom className={classes.content} color='textSecondary'>
-            <Box>
-              Last Update:
-            </Box>
-            {lastUpdateTime ? formatDate(lastUpdateTime) : 'No data'}
-          </Typography>
+        <Divider />
+        <Typography
+          variant='subtitle1'
+          display='block'
+          gutterBottom
+          className={classes.content}
+          color='textSecondary'
+        >
+          <Box>Last Update:</Box>
+          {lastUpdateTime ? formatDate(lastUpdateTime) : 'No data'}
+        </Typography>
       </Drawer>
+
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        open={isSnackbarOpen}
+        onClose={handleSnackbarClose}
+        autoHideDuration={1000}
+        message='Update completed!'
+      />
     </div>
   );
 }

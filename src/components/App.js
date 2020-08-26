@@ -1,10 +1,20 @@
 import CssBaseline from '@material-ui/core/CssBaseline';
-import React, { Component, useState } from 'react';
+import React from 'react';
 import MyAppBar from './MyAppBar';
-import * as GapiConnection from './GapiConnection';
 import Photos from './Photos/Photos';
-import { makeStyles } from "@material-ui/core/";
+import AccessProvider from './AccessContext';
+import UrlsProvider from './UrlsContext';
+import Footer from './Footer';
+import { Box } from '@material-ui/core/';
+import { makeStyles } from '@material-ui/core/styles';
+import SimpleBackdrop from "./Backdrop";
+import FeedbackProvider from './FeedbackContext';
 
+const useStyles = makeStyles({
+  main: {
+    minHeight: '93.5vh',
+  },
+});
 
 // load gapi
 // googleAPI.loadApi();
@@ -15,24 +25,23 @@ import { makeStyles } from "@material-ui/core/";
 // get all the meta data from Google Photos
 // display some recent photos(indicate success)
 
-const useStyles = makeStyles(theme => ({
-  offset: theme.mixins.toolbar,
-}))
-
-export default function App(props) {
-  const [photoUrls, setPhotoUrls] = useState([]);
+export default function App() {
   const classes = useStyles();
-
-  const handlePhotos = (baseUrls) => {
-    setPhotoUrls(baseUrls);
-  };
-
   return (
     <div>
-      <CssBaseline />
-      <MyAppBar onPhotos={handlePhotos}/>
-      {/* <div className={classes.offset} /> */}
-      <Photos photoUrls={photoUrls} ></Photos>
+      <AccessProvider>
+        <UrlsProvider>
+        <FeedbackProvider>
+          <CssBaseline />
+          <Box className={classes.main}>
+            <MyAppBar />
+            <Photos />
+            <SimpleBackdrop />
+          </Box>
+          <Footer />
+        </FeedbackProvider>
+        </UrlsProvider>
+      </AccessProvider>
     </div>
   );
 }

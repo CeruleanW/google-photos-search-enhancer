@@ -1,5 +1,4 @@
 import { openDB } from 'idb';
-import React from 'react';
 
 let dbPromise;
 createDatabase();
@@ -32,6 +31,7 @@ export function createDatabase() {
   return dbPromise;
 }
 
+// store an array
 export async function storeMediaItems(mediaItems) {
   const db = await dbPromise;
   const tx = db.transaction('localMediaItems', 'readwrite');
@@ -71,13 +71,6 @@ export async function search(keyword) {
     //   return null;
     // }
     return result;
-}
-
-export async function getProductUrl(ids) {
-  const db = await dbPromise;
-  const store = db.transaction('localMediaItems').store;
-  const values = await ids.map( id => db.getFromIndex('localMediaItems', 'id', id) );
-  return ;
 }
 
 export default function IndexedDB() {}
