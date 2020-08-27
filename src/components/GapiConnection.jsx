@@ -5,6 +5,10 @@ import {
   getTimeStamp,
 } from './IndexedDBController';
 
+
+export const controller = new AbortController();
+const signal = controller.signal;
+
 const createBaseInit = (accessToken) => {
   let myHeaders = {};
   Object.assign(myHeaders, { 'Content-Type': 'application/json' });
@@ -13,6 +17,7 @@ const createBaseInit = (accessToken) => {
   const baseInit = {
     headers: myHeaders,
     mode: 'no-cors',
+    signal,
   };
 
   return baseInit;

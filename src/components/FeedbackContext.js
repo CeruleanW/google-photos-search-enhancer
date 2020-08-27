@@ -14,6 +14,7 @@ export function useFeedbackUpdate() {
 export default function FeedbackProvider( {children} ) {
   const [isBackdropOpened, setisBackdropOpened] = useState(false);
   const [textMessage, setTextMessage] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   function handleBackdrop(isBackdropOpened) {
     setisBackdropOpened(isBackdropOpened);
@@ -23,9 +24,13 @@ export default function FeedbackProvider( {children} ) {
     setTextMessage(text);
   }
 
+  function handleIsSearching(isSearch) {
+    setIsSearching(isSearch);
+  }
+
   return (
-    <FeedbackContext.Provider value={{isBackdropOpened, textMessage}}>
-      <FeedbackUpdateContext.Provider value={{handleBackdrop, handleTextMessage}}>
+    <FeedbackContext.Provider value={{isBackdropOpened, textMessage, isSearching}}>
+      <FeedbackUpdateContext.Provider value={{handleBackdrop, handleTextMessage, handleIsSearching}}>
       {children}
       </FeedbackUpdateContext.Provider>
     </FeedbackContext.Provider>

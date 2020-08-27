@@ -20,10 +20,11 @@ import { Box, Grid } from '@material-ui/core';
 import { clearData } from './IndexedDBController';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { getTimeStamp, setTimeStamp } from './IndexedDBController';
-import { requestAllMediaItems, requestNewMediaItems } from './GapiConnection';
+import { requestAllMediaItems, requestNewMediaItems, controller } from './GapiConnection';
 import { useAccessToken } from './AccessContext';
 import { useFeedbackUpdate } from './FeedbackContext';
 import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 
 export default function MyAppBar() {
   // Styles
@@ -87,49 +88,76 @@ export default function MyAppBar() {
   }));
   const classes = useStyles();
   const theme = useTheme();
-  const matches = useMediaQuery(theme.breakpoints.up('md'));
   let justifyStyle;
-  matches ? (justifyStyle = 'flex-end') : (justifyStyle = 'center');
+  useMediaQuery(theme.breakpoints.up('md')) ? (justifyStyle = 'flex-end') : (justifyStyle = 'center');
 
+  // Context
   const accessToken = useAccessToken();
   const updateFeedback = useFeedbackUpdate();
 
-  const [isOpen, setIsOpen] = useState(false);
+  // State
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState('');
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+  const [snackPack, setSnackPack] = useState([]);
+  const [messageInfo, setMessageInfo] = useState('');
+  const [severity, setSeverity] = useState(undefined);
+
+  React.useEffect(() => {
+    if (snackPack.length) {
+      // Set a new snack when we don't have an active one
+      setMessageInfo(snackPack[0].message);
+      setSeverity(snackPack[0].severity)
+      setSnackPack( prev => prev.slice(1));
+      setIsSnackbarOpen(true);
+    } else if (snackPack.length && messageInfo && isSnackbarOpen) {
+      // Close an active snack when a new one is added
+      setIsSnackbarOpen(false);
+    }
+  }, [snackPack, messageInfo, isSnackbarOpen]);
 
   const handleDrawerOpen = () => {
-    setIsOpen(true);
+    setIsDrawerOpen(true);
   };
   const handleDrawerClose = () => {
-    setIsOpen(false);
+    setIsDrawerOpen(false);
   };
 
   const handleClear = () => {
-    clearData();
+    clearData().then(
+      () => addSnackPack('success', 'Clear completed!')
+    );
     setTimeStamp('');
     setLastUpdateTime(getTimeStamp());
   };
 
-  const handleSnackbarClose = () => {setIsSnackbarOpen(false)};
+  const handleSnackbarClose = () => {
+    setIsSnackbarOpen(false);
+  };
+
+  const addSnackPack = (sever, text) => {
+    const severity = sever || 'success';
+    const message = text || 'Update completed!';
+    setSnackPack((prev) => [...prev, { severity, message, key: new Date().getTime() }]);
+  }
 
   const handleUpdate = () => {
     updateFeedback.handleBackdrop(true);
-    updateFeedback.handleTextMessage('Updating local data... Please wait for a while');
+    updateFeedback.handleTextMessage(
+      'Updating local data... Please wait for a while'
+    );
     requestAllMediaItems(accessToken)
       .then((fulfilled) => {
         console.log('Update completed!');
-        setIsSnackbarOpen(true);
+        addSnackPack('success', 'Update completed!');
         // Update the LastUpdateView
         setLastUpdateTime(getTimeStamp());
       })
       .finally(() => {
         updateFeedback.handleBackdrop(false);
         updateFeedback.handleTextMessage('');
-        setIsSnackbarOpen(false);
       });
   };
-
 
   const getNewLastUpdateTime = () => {
     setLastUpdateTime(getTimeStamp());
@@ -162,7 +190,7 @@ export default function MyAppBar() {
       <AppBar
         position='sticky'
         className={clsx(classes.appBar, {
-          [classes.appBarShift]: isOpen,
+          [classes.appBarShift]: isDrawerOpen,
         })}
       >
         <Toolbar>
@@ -181,7 +209,7 @@ export default function MyAppBar() {
                 aria-label='open drawer'
                 onClick={handleDrawerOpen}
                 edge='start'
-                className={clsx(classes.menuButton, isOpen && classes.hide)}
+                className={clsx(classes.menuButton, isDrawerOpen && classes.hide)}
               >
                 <MenuIcon />
               </IconButton>
@@ -221,7 +249,7 @@ export default function MyAppBar() {
         className={classes.drawer}
         variant='persistent'
         anchor='left'
-        open={isOpen}
+        open={isDrawerOpen}
         classes={{
           paper: classes.drawerPaper,
         }}
@@ -240,14 +268,14 @@ export default function MyAppBar() {
           <ListItem button>
             <ListItemText primary='Update data' onClick={handleUpdate} />
           </ListItem>
-          <ListItem button>
-            <ListItemText primary='Clear data' onClick={handleClear} />
+          <ListItem button onClick={handleClear} disabled={!lastUpdateTime}>
+            <ListItemText primary='Clear data' />
           </ListItem>
-          <ListItem button>
-            <ListItemText primary='Random Sort' />
-          </ListItem>
-          <ListItem button>
+          <ListItem button onClick={controller.abort}>
             <ListItemText primary='Stop' />
+          </ListItem>
+          <ListItem button>
+            <ListItemText primary='Help' />
           </ListItem>
         </List>
         <Divider />
@@ -267,9 +295,17 @@ export default function MyAppBar() {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         open={isSnackbarOpen}
         onClose={handleSnackbarClose}
-        autoHideDuration={1000}
-        message='Update completed!'
-      />
+        autoHideDuration={3000}
+      >
+        <MuiAlert
+          onClose={handleSnackbarClose}
+          severity={severity}
+          elevation={6}
+          variant='filled'
+        >
+          {messageInfo}
+        </MuiAlert>
+      </Snackbar>
     </div>
   );
 }

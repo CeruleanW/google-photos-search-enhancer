@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -36,6 +37,7 @@
     "@material-ui/icons": "^4.9.1",
     "idb": "^5.0.4",
     "react-google-login": "^5.1.21",
+    "react-masonry-css": "^1.0.14",
     "react-sticky-footer": "0.1.0-rc3"
   }
 }

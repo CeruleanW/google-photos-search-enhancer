@@ -46,7 +46,7 @@ export async function storeMediaItems(mediaItems) {
 
 export async function clearData() {
   const db = await dbPromise;
-  db.clear('localMediaItems');
+  return db.clear('localMediaItems');;
 }
 
 // search a keyword and return an array of matched Ids(keys)
@@ -62,14 +62,15 @@ export async function search(keyword) {
     // loop through each media items
     while (cursor) {
       let des = cursor.value.description;
-      if (des && des.includes(keyword)) {
+      let fileName = cursor.value.filename;
+      if (fileName && fileName.includes(keyword)) {
+        result.push(cursor.key);
+      }
+      else if (des && des.includes(keyword)) {
         result.push(cursor.key);
       }
       cursor = await cursor.continue();
     }
-    // if (result.length === 0) {
-    //   return null;
-    // }
     return result;
 }
 

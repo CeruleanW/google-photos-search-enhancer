@@ -7,6 +7,7 @@ import { search } from './IndexedDBController';
 import { requestForSingleItem } from './GapiConnection';
 import { useAccessToken } from './AccessContext';
 import { usePhotoUrlUpdate } from './UrlsContext';
+import { useFeedbackUpdate } from './FeedbackContext';
 
 const useStyles = makeStyles((theme) => ({
   search: {
@@ -55,27 +56,29 @@ export default function SearchBar() {
   const classes = useStyles();
   const accessToken = useAccessToken();
   const updatePhotoUrlUpdate = usePhotoUrlUpdate();
+  const updateIsSearching = useFeedbackUpdate().handleIsSearching;
   const [keyword, setKeyword] = useState('');
+  
 
   // Search the local IndexedDB by the keyword in state, pass the base urls to Photos
   const handleSearch = () => {
     if (!keyword) {return false}
+
+    // show the progress feedback
+    updateIsSearching(true);
     // pass keyword to search media items from IndexedDB
     // get the image URLs
     search(keyword).then( (fulfilled) => {
-      console.log(fulfilled);
       const ids = fulfilled; 
-
       // return the base urls and the product urls
       requestForSingleItem(ids, accessToken).then(
         (urls) => {
           console.log(urls);
           // send the base urls in response to App
-          // props.onPhotos(urls);
           updatePhotoUrlUpdate(urls);
         }
       );
-    }).catch( rejected => console.log('Error: ' + rejected));
+    }).catch( rejected => console.log('Error: ' + rejected)).finally( () => updateIsSearching(false));
   };
 
   const handleKeywordChange = (event) => {
@@ -103,6 +106,7 @@ export default function SearchBar() {
           Search
         </Button>
       </Grid>
+      
     </>
   );
 }
