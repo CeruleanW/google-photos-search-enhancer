@@ -85,6 +85,15 @@ export default function SearchBar() {
     setKeyword(event.target.value);
   }
 
+  const handleSearchKeyUp = (event) => {
+    if (event.keyCode === 13) {
+      // Cancel the default action, if needed
+      event.preventDefault();
+      // Trigger the button element with a click
+      handleSearch();
+    }
+  }
+
   return (
     <>
       <Grid className={classes.search} item xs={9}>
@@ -99,6 +108,7 @@ export default function SearchBar() {
           }}
           inputProps={{ 'aria-label': 'search' }}
           onChange={handleKeywordChange}
+          onKeyUp={handleSearchKeyUp}
         />
       </Grid>
       <Grid item>

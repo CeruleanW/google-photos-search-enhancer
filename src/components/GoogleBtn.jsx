@@ -39,6 +39,7 @@ export default function GoogleBtn(props) {
   const logout = () => {
     setIsLogined(false);
     updateAccessToken('');
+    // clear search results
   };
 
   const handleLoginFailure = (response) => {
@@ -75,7 +76,6 @@ export default function GoogleBtn(props) {
         .finally(() => {
           updateBackdrop(false);
           updateTextMessage('');
-
         });
     }
   };
@@ -104,7 +104,7 @@ export default function GoogleBtn(props) {
           clientId={oauth2.clientID}
           onSuccess={login}
           onFailure={handleLoginFailure}
-          cookiePolicy={'single_host_origin'}
+          cookiePolicy='single_host_origin'
           responseType='code,token'
           scope={oauth2.scopes[1]}
           isSignedIn={true}
