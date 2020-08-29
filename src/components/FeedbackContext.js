@@ -28,6 +28,7 @@ export default function FeedbackProvider( {children} ) {
     setIsSearching(isSearch);
   }
 
+
   return (
     <FeedbackContext.Provider value={{isBackdropOpened, textMessage, isSearching}}>
       <FeedbackUpdateContext.Provider value={{handleBackdrop, handleTextMessage, handleIsSearching}}>

@@ -21,10 +21,11 @@ import { clearData } from './IndexedDBController';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { getTimeStamp, setTimeStamp } from './IndexedDBController';
 import { requestAllMediaItems, requestNewMediaItems, controller } from './GapiConnection';
-import { useAccessToken } from './AccessContext';
+import { useAccess } from './AccessContext';
 import { useFeedbackUpdate } from './FeedbackContext';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
+import HelpModal from './HelpModal';
 
 export default function MyAppBar() {
   // Styles
@@ -92,7 +93,8 @@ export default function MyAppBar() {
   useMediaQuery(theme.breakpoints.up('md')) ? (justifyStyle = 'flex-end') : (justifyStyle = 'center');
 
   // Context
-  const accessToken = useAccessToken();
+  const accessToken = useAccess().accessToken;
+  const isLogined = useAccess().isLogined;
   const updateFeedback = useFeedbackUpdate();
 
   // State
@@ -102,6 +104,7 @@ export default function MyAppBar() {
   const [snackPack, setSnackPack] = useState([]);
   const [messageInfo, setMessageInfo] = useState('');
   const [severity, setSeverity] = useState(undefined);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   React.useEffect(() => {
     if (snackPack.length) {
@@ -182,6 +185,14 @@ export default function MyAppBar() {
     addZero(seconds);
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
+  const handleHelpModalOpen = () => {
+    setIsHelpModalOpen(true);
+  };
+
+  const handleHelpModalClose = () => {
+    setIsHelpModalOpen(false);
   };
 
   return (
@@ -265,8 +276,8 @@ export default function MyAppBar() {
         </div>
         <Divider />
         <List>
-          <ListItem button>
-            <ListItemText primary='Update data' onClick={handleUpdate} />
+          <ListItem button onClick={handleUpdate} disabled={!isLogined}>
+            <ListItemText primary='Update data' />
           </ListItem>
           <ListItem button onClick={handleClear} disabled={!lastUpdateTime}>
             <ListItemText primary='Clear data' />
@@ -274,7 +285,7 @@ export default function MyAppBar() {
           <ListItem button onClick={controller.abort}>
             <ListItemText primary='Stop' />
           </ListItem>
-          <ListItem button>
+          <ListItem button onClick={handleHelpModalOpen} disabled={isHelpModalOpen}>
             <ListItemText primary='Help' />
           </ListItem>
         </List>
@@ -306,6 +317,8 @@ export default function MyAppBar() {
           {messageInfo}
         </MuiAlert>
       </Snackbar>
+
+      <HelpModal open={isHelpModalOpen} onClose={handleHelpModalClose}/>
     </div>
   );
 }

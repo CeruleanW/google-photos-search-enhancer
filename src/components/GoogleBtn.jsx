@@ -1,11 +1,11 @@
 /* global gapi */
-import React, { useState } from 'react';
+import React from 'react';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import * as credentials from './credentials.json';
 import { getTimeStamp } from './IndexedDBController';
 import { requestAllMediaItems, requestNewMediaItems } from './GapiConnection';
 import { Button } from '@material-ui/core';
-import { useAccessTokenUpdate } from './AccessContext';
+import { useAccessUpdate, useAccess } from './AccessContext';
 import { useFeedbackUpdate } from './FeedbackContext';
 
 const oauth2 = {
@@ -21,15 +21,16 @@ const oauth2 = {
 
 export default function GoogleBtn(props) {
   // const classes = useStyles();
-  const [isLogined, setIsLogined] = useState(false);
-  const updateAccessToken = useAccessTokenUpdate();
+  const updateAccessToken = useAccessUpdate().handleAccessToken;
   const updateBackdrop = useFeedbackUpdate().handleBackdrop;
   const updateTextMessage = useFeedbackUpdate().handleTextMessage;
+  const updateIsLogined = useAccessUpdate().handleIsLogined;
+  const isLogined = useAccess().isLogined;
 
   // login, get the access token
   const login = (response) => {
     if (response.accessToken) {
-      setIsLogined(true);
+      updateIsLogined(true);
       updateAccessToken(response.accessToken);
       // start request
       handleRequest(response.accessToken);
@@ -37,7 +38,7 @@ export default function GoogleBtn(props) {
   };
 
   const logout = () => {
-    setIsLogined(false);
+    updateIsLogined(false);
     updateAccessToken('');
     // clear search results
   };

@@ -20,11 +20,11 @@ export default function App() {
     <div>
       <AccessProvider>
         <UrlsProvider>
-        <FeedbackProvider>
-          <CssBaseline />
+          <FeedbackProvider>
+            <CssBaseline />
             <Main />
-          <Footer />
-        </FeedbackProvider>
+            <Footer />
+          </FeedbackProvider>
         </UrlsProvider>
       </AccessProvider>
     </div>

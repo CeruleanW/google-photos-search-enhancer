@@ -5,7 +5,7 @@ import { makeStyles, fade } from '@material-ui/core/styles';
 import { Button, Grid } from '@material-ui/core';
 import { search } from './IndexedDBController';
 import { requestForSingleItem } from './GapiConnection';
-import { useAccessToken } from './AccessContext';
+import { useAccess } from './AccessContext';
 import { usePhotoUrlUpdate } from './UrlsContext';
 import { useFeedbackUpdate } from './FeedbackContext';
 
@@ -54,9 +54,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SearchBar() {
   const classes = useStyles();
-  const accessToken = useAccessToken();
+  const accessToken = useAccess().accessToken;
   const updatePhotoUrlUpdate = usePhotoUrlUpdate();
   const updateIsSearching = useFeedbackUpdate().handleIsSearching;
+
   const [keyword, setKeyword] = useState('');
   
 
@@ -66,10 +67,16 @@ export default function SearchBar() {
 
     // show the progress feedback
     updateIsSearching(true);
+
     // pass keyword to search media items from IndexedDB
     // get the image URLs
     search(keyword).then( (fulfilled) => {
       const ids = fulfilled; 
+      if (!ids) {
+        return 'No result';
+      }
+      updateIsSearching(false);
+      
       // return the base urls and the product urls
       requestForSingleItem(ids, accessToken).then(
         (urls) => {
@@ -116,7 +123,6 @@ export default function SearchBar() {
           Search
         </Button>
       </Grid>
-      
     </>
   );
 }
