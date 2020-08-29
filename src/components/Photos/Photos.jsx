@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {} from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Masonry from 'react-masonry-css';
 import Skeleton from '@material-ui/lab/Skeleton';
+import { useUrl } from '../UrlsContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,21 +49,19 @@ export default function Photos(props) {
     500: 1,
   };
 
-  const [loadingPhotos, setLoadingPhotos] = useState(false);
-  const [gridsBaseUrls, setGridsBaseUrls] = useState([]);
+  // States
+  const [loadingPhotos, setLoadingPhotos] = useState(true);
+  const photoUrls = useUrl().photoUrls;
 
   useEffect(() => {
     setLoadingPhotos(true);
-    // process base urls into image src urls
-    if (props.photoUrls.length > 0) {
-      setGridsBaseUrls(props.photoUrls.map((url) => `${url.baseUrl}=w640-h640`));
-    }
+
     const timer = setTimeout(() => {
       setLoadingPhotos(false);
-    }, 2000);
+    }, 1800);
 
     return () => clearTimeout(timer);
-  }, [props.photoUrls, setLoadingPhotos]);
+  }, []);
 
   const handleClick = (url) => {
     window.open(url);
@@ -70,25 +69,31 @@ export default function Photos(props) {
 
   return (
     <div className={classes.root}>
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className={classes.masonryGrid}
-        columnClassName={classes.masonryGridColumn}
-      >
-        {gridsBaseUrls.map((imgUrl, index) =>
-          loadingPhotos ? (
-            <Skeleton key={index} height={12} variant='rect' />
-          ) : (
+      {loadingPhotos ? (
+        <Grid container spacing={1} >
+          {props.ids.map((id) => (
+            <Grid item xs={12} sm={6} md={4} lg={3}>
+              <Skeleton key={id} variant='rect' height={300} />
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className={classes.masonryGrid}
+          columnClassName={classes.masonryGridColumn}
+        >
+          {props.ids.map((id, index) => (
             <img
-              key={index}
-              src={imgUrl}
+              key={id}
+              src={!photoUrls.length || `${photoUrls[index].baseUrl}=w640-h640`}
               alt='Google Photos'
               className={classes.image}
-              onClick={() => handleClick(props.photoUrls[index].productUrl)}
+              onClick={() => handleClick(photoUrls[index].productUrl)}
             />
-          )
-        )}
-      </Masonry>
+          ))}
+        </Masonry>
+      )}
     </div>
   );
 }

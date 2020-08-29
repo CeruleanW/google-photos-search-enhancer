@@ -6,7 +6,7 @@ import { Button, Grid } from '@material-ui/core';
 import { search } from './IndexedDBController';
 import { requestForSingleItem } from './GapiConnection';
 import { useAccess } from './AccessContext';
-import { usePhotoUrlUpdate } from './UrlsContext';
+import { useUrlUpdate } from './UrlsContext';
 import { useFeedbackUpdate } from './FeedbackContext';
 
 const useStyles = makeStyles((theme) => ({
@@ -55,42 +55,49 @@ const useStyles = makeStyles((theme) => ({
 export default function SearchBar() {
   const classes = useStyles();
   const accessToken = useAccess().accessToken;
-  const updatePhotoUrlUpdate = usePhotoUrlUpdate();
+  const isLogined = useAccess().isLogined;
+  const updatePhotoUrls = useUrlUpdate().handlePhotoUrls;
   const updateIsSearching = useFeedbackUpdate().handleIsSearching;
+  const updateSearchedIds = useUrlUpdate().handleSearchedIds;
 
   const [keyword, setKeyword] = useState('');
-  
 
   // Search the local IndexedDB by the keyword in state, pass the base urls to Photos
   const handleSearch = () => {
-    if (!keyword) {return false}
+    if (!keyword) {
+      return false;
+    }
 
     // show the progress feedback
     updateIsSearching(true);
+    // reset search result to zero
+    updateSearchedIds([]);
 
     // pass keyword to search media items from IndexedDB
     // get the image URLs
-    search(keyword).then( (fulfilled) => {
-      const ids = fulfilled; 
-      if (!ids) {
-        return 'No result';
-      }
-      updateIsSearching(false);
-      
-      // return the base urls and the product urls
-      requestForSingleItem(ids, accessToken).then(
-        (urls) => {
+    search(keyword)
+      .then((fulfilled) => {
+        const ids = fulfilled;
+        updateSearchedIds(ids);
+        if (!ids.length) {
+          return 'No result';
+        }
+        updateIsSearching(false);
+
+        // request for the base urls and the product urls
+        requestForSingleItem(ids, accessToken).then((urls) => {
           console.log(urls);
           // send the base urls in response to App
-          updatePhotoUrlUpdate(urls);
-        }
-      );
-    }).catch( rejected => console.log('Error: ' + rejected)).finally( () => updateIsSearching(false));
+          updatePhotoUrls(urls);
+        });
+      })
+      .catch((rejected) => console.log('Error: ' + rejected))
+      .finally(() => updateIsSearching(false));
   };
 
   const handleKeywordChange = (event) => {
     setKeyword(event.target.value);
-  }
+  };
 
   const handleSearchKeyUp = (event) => {
     if (event.keyCode === 13) {
@@ -99,7 +106,7 @@ export default function SearchBar() {
       // Trigger the button element with a click
       handleSearch();
     }
-  }
+  };
 
   return (
     <>
@@ -119,7 +126,7 @@ export default function SearchBar() {
         />
       </Grid>
       <Grid item>
-        <Button variant='contained' onClick={handleSearch}>
+        <Button variant='contained' onClick={handleSearch} disabled={!isLogined}>
           Search
         </Button>
       </Grid>

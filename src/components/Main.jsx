@@ -5,7 +5,7 @@ import SimpleBackdrop from './Backdrop';
 import { Box, LinearProgress } from '@material-ui/core/';
 import { useFeedback } from './FeedbackContext';
 import { makeStyles } from '@material-ui/core/styles';
-import { usePhotoUrl } from './UrlsContext';
+import { useUrl } from './UrlsContext';
 import icon from '../images/icons8-search-500.png';
 
 const useStyles = makeStyles((theme) => ({
@@ -18,14 +18,14 @@ const useStyles = makeStyles((theme) => ({
     // backgroundPosition: 'bottom 10px right 30px',
   },
   linearProgress: {
-    width: '90%',
-    height: '6px',
-    position: 'fixed',
-    bottom: '65px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    left: 0,
-    right: 0,
+    // width: '90%',
+    // height: '6px',
+    // position: 'fixed',
+    // bottom: '65px',
+    // marginLeft: 'auto',
+    // marginRight: 'auto',
+    // left: 0,
+    // right: 0,
   },
   centerText: {
     color: '#2d72bc',
@@ -66,14 +66,16 @@ const CenterBackground = (props) => {
 
 export default function Main() {
   const classes = useStyles();
+
   const isSearching = useFeedback().isSearching;
-  const photoUrls = usePhotoUrl();
+  const ids = useUrl().searchedIds;
+
 
   return (
     <Box className={classes.main}>
       <MyAppBar />
-      {photoUrls && photoUrls.length ? (
-        <Photos photoUrls={photoUrls} />
+      {(ids && ids.length) ? (
+        <Photos ids={ids} />
       ) : (
         <CenterBackground />
       )}
