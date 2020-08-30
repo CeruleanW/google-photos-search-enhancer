@@ -5,7 +5,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
 import GoogleBtn from './GoogleBtn';
-import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -16,16 +15,20 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid, IconButton, Snackbar } from '@material-ui/core';
 import { clearData } from './IndexedDBController';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { getTimeStamp, setTimeStamp } from './IndexedDBController';
-import { requestAllMediaItems, requestNewMediaItems, controller } from './GapiConnection';
+import {
+  requestAllMediaItems,
+  requestNewMediaItems,
+  controller,
+} from './GapiConnection';
 import { useAccess } from './AccessContext';
 import { useFeedbackUpdate } from './FeedbackContext';
-import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import HelpModal from './HelpModal';
+import MyDialog from './MyDialog';
 
 export default function MyAppBar() {
   // Styles
@@ -90,7 +93,9 @@ export default function MyAppBar() {
   const classes = useStyles();
   const theme = useTheme();
   let justifyStyle;
-  useMediaQuery(theme.breakpoints.up('md')) ? (justifyStyle = 'flex-end') : (justifyStyle = 'center');
+  useMediaQuery(theme.breakpoints.up('md'))
+    ? (justifyStyle = 'flex-end')
+    : (justifyStyle = 'center');
 
   // Context
   const accessToken = useAccess().accessToken;
@@ -105,19 +110,44 @@ export default function MyAppBar() {
   const [messageInfo, setMessageInfo] = useState('');
   const [severity, setSeverity] = useState(undefined);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [openUpdateAlertDialog, setOpenUpdateAlertDialog] = useState(false);
+  const [isUpdateAgreed, setIsUpdateAgreed] = useState(undefined);
 
+  // Update SnackPack 
   React.useEffect(() => {
     if (snackPack.length) {
       // Set a new snack when we don't have an active one
       setMessageInfo(snackPack[0].message);
-      setSeverity(snackPack[0].severity)
-      setSnackPack( prev => prev.slice(1));
+      setSeverity(snackPack[0].severity);
+      setSnackPack((prev) => prev.slice(1));
       setIsSnackbarOpen(true);
     } else if (snackPack.length && messageInfo && isSnackbarOpen) {
       // Close an active snack when a new one is added
       setIsSnackbarOpen(false);
     }
   }, [snackPack, messageInfo, isSnackbarOpen]);
+
+  // Update local data after it's confirmed 
+  React.useEffect(() => {
+    if (isUpdateAgreed === true) {
+      updateFeedback.handleBackdrop(true);
+      updateFeedback.handleTextMessage(
+        'Updating local data... Please wait for a while'
+      );
+      requestAllMediaItems(accessToken)
+        .then((fulfilled) => {
+          console.log('Update completed!');
+          addSnackPack('success', 'Update completed!');
+          // Update the LastUpdateView
+          setLastUpdateTime(getTimeStamp());
+        })
+        .finally(() => {
+          updateFeedback.handleBackdrop(false);
+          updateFeedback.handleTextMessage('');
+        });
+      setIsUpdateAgreed(undefined);
+    }
+  }, [isUpdateAgreed, accessToken, updateFeedback]);
 
   const handleDrawerOpen = () => {
     setIsDrawerOpen(true);
@@ -127,9 +157,7 @@ export default function MyAppBar() {
   };
 
   const handleClear = () => {
-    clearData().then(
-      () => addSnackPack('success', 'Clear completed!')
-    );
+    clearData().then(() => addSnackPack('success', 'Clear completed!'));
     setTimeStamp('');
     setLastUpdateTime(getTimeStamp());
   };
@@ -139,27 +167,25 @@ export default function MyAppBar() {
   };
 
   const addSnackPack = (sever, text) => {
-    const severity = sever || 'success';
-    const message = text || 'Update completed!';
-    setSnackPack((prev) => [...prev, { severity, message, key: new Date().getTime() }]);
-  }
+    const severity = sever || 'info';
+    const message = text || "Don't panic";
+    setSnackPack((prev) => [
+      ...prev,
+      { severity, message, key: new Date().getTime() },
+    ]);
+  };
 
   const handleUpdate = () => {
-    updateFeedback.handleBackdrop(true);
-    updateFeedback.handleTextMessage(
-      'Updating local data... Please wait for a while'
-    );
-    requestAllMediaItems(accessToken)
-      .then((fulfilled) => {
-        console.log('Update completed!');
-        addSnackPack('success', 'Update completed!');
-        // Update the LastUpdateView
-        setLastUpdateTime(getTimeStamp());
-      })
-      .finally(() => {
-        updateFeedback.handleBackdrop(false);
-        updateFeedback.handleTextMessage('');
-      });
+    setOpenUpdateAlertDialog(true);
+  };
+
+  const handleAlertDialogClose = () => {
+    setOpenUpdateAlertDialog(false);
+  };
+
+  const handleIsUpdateAgreed = (isAgreed) => {
+    setIsUpdateAgreed(isAgreed);
+    setOpenUpdateAlertDialog(false);
   };
 
   const getNewLastUpdateTime = () => {
@@ -220,7 +246,10 @@ export default function MyAppBar() {
                 aria-label='open drawer'
                 onClick={handleDrawerOpen}
                 edge='start'
-                className={clsx(classes.menuButton, isDrawerOpen && classes.hide)}
+                className={clsx(
+                  classes.menuButton,
+                  isDrawerOpen && classes.hide
+                )}
               >
                 <MenuIcon />
               </IconButton>
@@ -285,7 +314,11 @@ export default function MyAppBar() {
           <ListItem button onClick={controller.abort}>
             <ListItemText primary='Stop' />
           </ListItem>
-          <ListItem button onClick={handleHelpModalOpen} disabled={isHelpModalOpen}>
+          <ListItem
+            button
+            onClick={handleHelpModalOpen}
+            disabled={isHelpModalOpen}
+          >
             <ListItemText primary='Help' />
           </ListItem>
         </List>
@@ -318,7 +351,17 @@ export default function MyAppBar() {
         </MuiAlert>
       </Snackbar>
 
-      <HelpModal open={isHelpModalOpen} onClose={handleHelpModalClose}/>
+      <HelpModal open={isHelpModalOpen} onClose={handleHelpModalClose} />
+      <MyDialog
+        open={openUpdateAlertDialog}
+        onClose={handleAlertDialogClose}
+        onAgreed={handleIsUpdateAgreed}
+      >
+        <Typography>
+          This may take a long time (depending on the quantity of items in your
+          library). Are you sure to update?
+        </Typography>
+      </MyDialog>
     </div>
   );
 }

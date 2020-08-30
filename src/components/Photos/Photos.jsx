@@ -43,10 +43,11 @@ export default function Photos(props) {
   // Style
   const classes = useStyles();
   const breakpointColumnsObj = {
-    default: 4,
-    1100: 3,
-    700: 2,
-    500: 1,
+    default: 6,
+    1920: 4,
+    1280: 3,
+    960: 2,
+    600: 1,
   };
 
   // States
@@ -72,8 +73,8 @@ export default function Photos(props) {
       {loadingPhotos ? (
         <Grid container spacing={1} >
           {props.ids.map((id) => (
-            <Grid item xs={12} sm={6} md={4} lg={3}>
-              <Skeleton key={id} variant='rect' height={300} />
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={id}>
+              <Skeleton variant='rect' height={300} />
             </Grid>
           ))}
         </Grid>
@@ -86,7 +87,7 @@ export default function Photos(props) {
           {props.ids.map((id, index) => (
             <img
               key={id}
-              src={!photoUrls.length || `${photoUrls[index].baseUrl}=w640-h640`}
+              src={`${photoUrls[index].baseUrl}=w640-h640`}
               alt='Google Photos'
               className={classes.image}
               onClick={() => handleClick(photoUrls[index].productUrl)}
