@@ -123,6 +123,7 @@ export default function SearchBar() {
           inputProps={{ 'aria-label': 'search' }}
           onChange={handleKeywordChange}
           onKeyUp={handleSearchKeyUp}
+          autoFocus={true}
         />
       </Grid>
       <Grid item>

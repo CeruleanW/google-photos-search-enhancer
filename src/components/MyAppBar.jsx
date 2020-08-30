@@ -18,10 +18,9 @@ import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { Box, Grid, IconButton, Snackbar } from '@material-ui/core';
 import { clearData } from './IndexedDBController';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { getTimeStamp, setTimeStamp } from './IndexedDBController';
+import { getTimeStamp, setTimeStamp, checkNotFirstVisit } from './IndexedDBController';
 import {
   requestAllMediaItems,
-  requestNewMediaItems,
   controller,
 } from './GapiConnection';
 import { useAccess } from './AccessContext';
@@ -102,7 +101,7 @@ export default function MyAppBar() {
   const isLogined = useAccess().isLogined;
   const updateFeedback = useFeedbackUpdate();
 
-  // State
+  // States
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState('');
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
@@ -149,12 +148,12 @@ export default function MyAppBar() {
     }
   }, [isUpdateAgreed, accessToken, updateFeedback]);
 
-  const handleDrawerOpen = () => {
-    setIsDrawerOpen(true);
-  };
-  const handleDrawerClose = () => {
-    setIsDrawerOpen(false);
-  };
+  React.useEffect(() => {
+    // If it's the first time
+    if (!checkNotFirstVisit()) {
+      setIsHelpModalOpen(true);
+    }
+  }, []);
 
   const handleClear = () => {
     clearData().then(() => addSnackPack('success', 'Clear completed!'));
@@ -173,23 +172,6 @@ export default function MyAppBar() {
       ...prev,
       { severity, message, key: new Date().getTime() },
     ]);
-  };
-
-  const handleUpdate = () => {
-    setOpenUpdateAlertDialog(true);
-  };
-
-  const handleAlertDialogClose = () => {
-    setOpenUpdateAlertDialog(false);
-  };
-
-  const handleIsUpdateAgreed = (isAgreed) => {
-    setIsUpdateAgreed(isAgreed);
-    setOpenUpdateAlertDialog(false);
-  };
-
-  const getNewLastUpdateTime = () => {
-    setLastUpdateTime(getTimeStamp());
   };
 
   const formatDate = (date) => {
@@ -211,10 +193,6 @@ export default function MyAppBar() {
     addZero(seconds);
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
-
-  const handleHelpModalOpen = () => {
-    setIsHelpModalOpen(true);
   };
 
   const handleHelpModalClose = () => {
@@ -244,7 +222,7 @@ export default function MyAppBar() {
               <IconButton
                 color='inherit'
                 aria-label='open drawer'
-                onClick={handleDrawerOpen}
+                onClick={() => setIsDrawerOpen(true)}
                 edge='start'
                 className={clsx(
                   classes.menuButton,
@@ -295,8 +273,8 @@ export default function MyAppBar() {
         }}
       >
         <div className={classes.drawerHeader}>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'ltr' ? (
+          <IconButton onClick={() => setIsDrawerOpen(false)}>
+            {(theme.direction === 'ltr') ? (
               <ChevronLeftIcon />
             ) : (
               <ChevronRightIcon />
@@ -305,7 +283,7 @@ export default function MyAppBar() {
         </div>
         <Divider />
         <List>
-          <ListItem button onClick={handleUpdate} disabled={!isLogined}>
+          <ListItem button onClick={() => setOpenUpdateAlertDialog(true)} disabled={!isLogined}>
             <ListItemText primary='Update data' />
           </ListItem>
           <ListItem button onClick={handleClear} disabled={!lastUpdateTime}>
@@ -316,7 +294,7 @@ export default function MyAppBar() {
           </ListItem>
           <ListItem
             button
-            onClick={handleHelpModalOpen}
+            onClick={ () => setIsHelpModalOpen(true) }
             disabled={isHelpModalOpen}
           >
             <ListItemText primary='Help' />
@@ -354,12 +332,11 @@ export default function MyAppBar() {
       <HelpModal open={isHelpModalOpen} onClose={handleHelpModalClose} />
       <MyDialog
         open={openUpdateAlertDialog}
-        onClose={handleAlertDialogClose}
-        onAgreed={handleIsUpdateAgreed}
+        onClose={() => setOpenUpdateAlertDialog(false)}
+        onAgreed={(isAgreed) => setIsUpdateAgreed(isAgreed)}
       >
-        <Typography>
-          This may take a long time (depending on the quantity of items in your
-          library). Are you sure to update?
+        <Typography color='textPrimary'>
+        Depending on the quantity of items in your Google Photos Library, the updating time could be up to a few minutes. Are you sure to update?
         </Typography>
       </MyDialog>
     </div>

@@ -3,7 +3,7 @@ import { Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Masonry from 'react-masonry-css';
 import Skeleton from '@material-ui/lab/Skeleton';
-import { useUrl } from '../UrlsContext';
+import { useUrl } from './UrlsContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {

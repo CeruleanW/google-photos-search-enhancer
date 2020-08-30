@@ -3,11 +3,19 @@ import { openDB } from 'idb';
 let dbPromise;
 createDatabase();
 
+export function checkNotFirstVisit() {
+  if (!localStorage.noFirstVisit) {
+    console.log('first time');
+    localStorage.noFirstVisit = '1';
+    return false;
+  }
+  return localStorage.noFirstVisit;
+}
+
 export function setTimeStamp(value = true) {
   if (value) {
     localStorage.setItem('updateTime', new Date());
-  }
-  else {
+  } else {
     localStorage.setItem('updateTime', '');
   }
 }
@@ -46,32 +54,31 @@ export async function storeMediaItems(mediaItems) {
 
 export async function clearData() {
   const db = await dbPromise;
-  return db.clear('localMediaItems');;
+  return db.clear('localMediaItems');
 }
 
 // search a keyword and return an array of matched Ids(keys)
 export async function search(keyword) {
-    console.log('Keyword:' + keyword);
+  console.log('Keyword:' + keyword);
 
-    // request data from IndexedDB
-    const db = await dbPromise;
-    let store = db.transaction('localMediaItems').store;
-    let cursor = await store.openCursor();
-    let result = [];
+  // request data from IndexedDB
+  const db = await dbPromise;
+  let store = db.transaction('localMediaItems').store;
+  let cursor = await store.openCursor();
+  let result = [];
 
-    // loop through each media items
-    while (cursor) {
-      let des = cursor.value.description;
-      let fileName = cursor.value.filename;
-      if (fileName && fileName.includes(keyword)) {
-        result.push(cursor.key);
-      }
-      else if (des && des.includes(keyword)) {
-        result.push(cursor.key);
-      }
-      cursor = await cursor.continue();
+  // loop through each media items
+  while (cursor) {
+    let des = cursor.value.description;
+    let fileName = cursor.value.filename;
+    if (fileName && fileName.includes(keyword)) {
+      result.push(cursor.key);
+    } else if (des && des.includes(keyword)) {
+      result.push(cursor.key);
     }
-    return result;
+    cursor = await cursor.continue();
+  }
+  return result;
 }
 
 export default function IndexedDB() {}

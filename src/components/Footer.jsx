@@ -17,8 +17,6 @@ const useStyles = makeStyles({
   }
 });
 
-// 
-
 export default function Footer() {
 	const classes = useStyles();
 	return (

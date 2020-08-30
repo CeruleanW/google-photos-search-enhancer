@@ -1,6 +1,6 @@
 import React from 'react';
 import MyAppBar from './MyAppBar';
-import Photos from './Photos/Photos';
+import Photos from './Photos';
 import SimpleBackdrop from './Backdrop';
 import { Box, LinearProgress } from '@material-ui/core/';
 import { useFeedback } from './FeedbackContext';
@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('md')]: {
       width: '20%',
     },
-  }
+  },
 }));
 
 const CenterBackground = (props) => {
@@ -59,7 +59,7 @@ const CenterBackground = (props) => {
   const content = 'Search the description & filename of photos';
   return (
     <div className={classes.centerText + ' ' + classes.centerLayout}>
-      <img src={icon} alt='search-icon' className={classes.image}/>
+      <img src={icon} alt='search-icon' className={classes.image} />
     </div>
   );
 };
@@ -70,15 +70,10 @@ export default function Main() {
   const isSearching = useFeedback().isSearching;
   const ids = useUrl().searchedIds;
 
-
   return (
     <Box className={classes.main}>
       <MyAppBar />
-      {(ids && ids.length) ? (
-        <Photos ids={ids} />
-      ) : (
-        <CenterBackground />
-      )}
+      {(ids && ids.length) ? <Photos ids={ids} /> : <CenterBackground />}
       <SimpleBackdrop />
       {isSearching ? (
         <LinearProgress className={classes.linearProgress} />
