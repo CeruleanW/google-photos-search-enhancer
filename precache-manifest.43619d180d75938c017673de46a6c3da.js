@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "d7450447bccd4f022346e2aa42c940de",
+    "revision": "5db7a5d3faf4087474fe58066d88d2c0",
     "url": "/google-photos-search-enhancer/index.html"
   },
   {
