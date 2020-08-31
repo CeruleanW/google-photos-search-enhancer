@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/google-photos-search-enhancer/static/css/main.5ecd60fb.chunk.css",
+    "main.js": "/google-photos-search-enhancer/static/js/main.66289205.chunk.js",
+    "main.js.map": "/google-photos-search-enhancer/static/js/main.66289205.chunk.js.map",
+    "runtime-main.js": "/google-photos-search-enhancer/static/js/runtime-main.fc9f51fe.js",
+    "runtime-main.js.map": "/google-photos-search-enhancer/static/js/runtime-main.fc9f51fe.js.map",
+    "static/js/2.36ef3b71.chunk.js": "/google-photos-search-enhancer/static/js/2.36ef3b71.chunk.js",
+    "static/js/2.36ef3b71.chunk.js.map": "/google-photos-search-enhancer/static/js/2.36ef3b71.chunk.js.map",
+    "index.html": "/google-photos-search-enhancer/index.html",
+    "precache-manifest.2538c9c37325dac4b8f754afae88b637.js": "/google-photos-search-enhancer/precache-manifest.2538c9c37325dac4b8f754afae88b637.js",
+    "service-worker.js": "/google-photos-search-enhancer/service-worker.js",
+    "static/css/main.5ecd60fb.chunk.css.map": "/google-photos-search-enhancer/static/css/main.5ecd60fb.chunk.css.map",
+    "static/js/2.36ef3b71.chunk.js.LICENSE.txt": "/google-photos-search-enhancer/static/js/2.36ef3b71.chunk.js.LICENSE.txt",
+    "static/media/icons8-search-500.png": "/google-photos-search-enhancer/static/media/icons8-search-500.b831ad50.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.fc9f51fe.js",
+    "static/js/2.36ef3b71.chunk.js",
+    "static/css/main.5ecd60fb.chunk.css",
+    "static/js/main.66289205.chunk.js"
+  ]
+}
