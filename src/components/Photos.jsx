@@ -59,7 +59,7 @@ export default function Photos(props) {
 
     const timer = setTimeout(() => {
       setLoadingPhotos(false);
-    }, 1800);
+    }, 1200);
 
     return () => clearTimeout(timer);
   }, []);

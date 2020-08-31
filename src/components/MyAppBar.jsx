@@ -289,9 +289,9 @@ export default function MyAppBar() {
           <ListItem button onClick={handleClear} disabled={!lastUpdateTime}>
             <ListItemText primary='Clear data' />
           </ListItem>
-          <ListItem button onClick={controller.abort}>
+          {/* <ListItem button onClick={controller.abort}>
             <ListItemText primary='Stop' />
-          </ListItem>
+          </ListItem> */}
           <ListItem
             button
             onClick={ () => setIsHelpModalOpen(true) }

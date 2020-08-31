@@ -37,8 +37,6 @@
     "@material-ui/icons": "^4.9.1",
     "idb": "^5.0.4",
     "react-google-login": "^5.1.21",
-    "react-mason": "^1.1.2",
-    "react-masonry-component": "^6.2.1",
     "react-masonry-css": "^1.0.14",
     "react-sticky-footer": "0.1.0-rc3"
   }
