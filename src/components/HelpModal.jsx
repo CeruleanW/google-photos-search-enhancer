@@ -53,8 +53,8 @@ export default function HelpModal(props) {
           <Divider />
           <Box>
             <Typography color='textSecondary' className={classes.firstPara}>
-              This app will help you search through the descriptions and
-              filenames in your Google Photos Library.
+              This app will help you to search through the descriptions and
+              filenames in your Google Photos Library. Click the 'LOGIN' button to start!
             </Typography>
             <ul>
               <li>
