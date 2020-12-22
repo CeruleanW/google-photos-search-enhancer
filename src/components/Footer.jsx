@@ -5,11 +5,6 @@ import { Container, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles({
-  footerLayout: {
-    left: 0,
-    bottom: 0,
-    position: 'absolute'
-  },
   footerLink: {
     '&:visited': {
       color: 'blueviolet'
@@ -22,6 +17,7 @@ export default function Footer() {
 	return (
     <StickyFooter
     bottomThreshold={50}
+    // stickAtThreshold={0}
       normalStyles={{
         backgroundColor: '#1b2024',
         padding: '1rem',

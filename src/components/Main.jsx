@@ -10,7 +10,7 @@ import icon from '../images/icons8-search-500.png';
 
 const useStyles = makeStyles((theme) => ({
   main: {
-    minHeight: '93.5vh',
+    minHeight: '94vh',
     // backgroundColor: '#C2E3EB',
     // backgroundImage: 'url(./images/flock-of-birds-5403298_1280.png)',
     // backgroundSize: '600px',
