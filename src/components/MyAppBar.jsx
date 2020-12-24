@@ -13,9 +13,9 @@ import React, { useState } from 'react';
 import SearchBar from './SearchBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import clsx from 'clsx';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { Box, Grid, IconButton, Snackbar } from '@material-ui/core';
+import clsx from 'clsx';
 import { clearData } from './IndexedDBController';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { getTimeStamp, setTimeStamp, checkNotFirstVisit } from './IndexedDBController';
@@ -23,8 +23,8 @@ import {
   requestAllMediaItems,
   controller,
 } from './GapiConnection';
-import { useAccess } from './AccessContext';
-import { useFeedbackUpdate } from './FeedbackContext';
+import { useAccess } from './Context/AccessContext';
+import { useFeedbackUpdate } from './Context/FeedbackContext';
 import MuiAlert from '@material-ui/lab/Alert';
 import HelpModal from './HelpModal';
 import MyDialog from './MyDialog';

@@ -5,8 +5,8 @@ import * as credentials from './credentials.json';
 import { getTimeStamp } from './IndexedDBController';
 import { requestAllMediaItems, requestNewMediaItems } from './GapiConnection';
 import { Button } from '@material-ui/core';
-import { useAccessUpdate, useAccess } from './AccessContext';
-import { useFeedbackUpdate } from './FeedbackContext';
+import { useAccessUpdate, useAccess } from './Context/AccessContext';
+import { useFeedbackUpdate } from './Context/FeedbackContext';
 
 const oauth2 = {
   clientID: credentials.web.client_id,

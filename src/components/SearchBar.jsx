@@ -5,9 +5,9 @@ import { makeStyles, fade } from '@material-ui/core/styles';
 import { Button, Grid } from '@material-ui/core';
 import { search } from './IndexedDBController';
 import { requestForSingleItem } from './GapiConnection';
-import { useAccess } from './AccessContext';
-import { useUrlUpdate } from './UrlsContext';
-import { useFeedbackUpdate } from './FeedbackContext';
+import { useAccess } from './Context/AccessContext';
+import { useUrlUpdate } from './Context/UrlsContext';
+import { useFeedbackUpdate } from './Context/FeedbackContext';
 
 const useStyles = makeStyles((theme) => ({
   search: {
@@ -59,11 +59,13 @@ export default function SearchBar() {
   const updatePhotoUrls = useUrlUpdate().handlePhotoUrls;
   const updateIsSearching = useFeedbackUpdate().handleIsSearching;
   const updateSearchedIds = useUrlUpdate().handleSearchedIds;
+  const updateIsNoMatch = useFeedbackUpdate().handleIsNoMatch;
 
   const [keyword, setKeyword] = useState('');
 
   // Search the local IndexedDB by the keyword in state, pass the base urls to Photos
   const handleSearch = () => {
+    // No input in the searchbar
     if (!keyword) {
       return false;
     }
@@ -80,6 +82,8 @@ export default function SearchBar() {
         const ids = fulfilled;
         updateSearchedIds(ids);
         if (!ids.length) {
+          // display a error feedback
+          updateIsNoMatch(true);
           return 'No result';
         }
         updateIsSearching(false);

@@ -3,10 +3,12 @@ import MyAppBar from './MyAppBar';
 import Photos from './Photos';
 import SimpleBackdrop from './Backdrop';
 import { Box, LinearProgress } from '@material-ui/core/';
-import { useFeedback } from './FeedbackContext';
+import { useFeedback } from './Context/FeedbackContext';
 import { makeStyles } from '@material-ui/core/styles';
-import { useUrl } from './UrlsContext';
+import { useUrl } from './Context/UrlsContext';
 import icon from '../images/icons8-search-500.png';
+import NoMatchedSnackbar from './NoMatchedSnackbar';
+
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -74,6 +76,7 @@ export default function Main() {
     <Box className={classes.main}>
       <MyAppBar />
       {(ids && ids.length) ? <Photos ids={ids} /> : <CenterBackground />}
+      <NoMatchedSnackbar />
       <SimpleBackdrop />
       {isSearching ? (
         <LinearProgress className={classes.linearProgress} />
