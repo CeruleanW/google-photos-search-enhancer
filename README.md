@@ -4,7 +4,9 @@
 
 Google Photos is powerful for searching in English. However, you can only search some general keywords in other languages, which leads to unpredictable results. cannot search specific text in Chinese within names or descriptions. This app will help you search through the descriptions and filenames in your Google Photos Library in any language.
 
-Live: https://ceruleanw.github.io/google-photos-search-enhancer/
+Website: https://ceruleanw.github.io/google-photos-search-enhancer/
+
+[![demo.gif](https://i.postimg.cc/13dhy1tC/demo.gif)](https://postimg.cc/QFcnqPc1)
 
 ## Features
 
