@@ -15,7 +15,7 @@ const createBaseInit = (accessToken) => {
 
   const baseInit = {
     headers: myHeaders,
-    mode: "no-cors",
+    mode: "cors",
     signal,
   };
 
@@ -37,13 +37,12 @@ const createInit = (
     filters,
     pageSize,
   };
-
   if (pageToken) {
     Object.assign(body, { pageToken: pageToken });
   }
-
   body = JSON.stringify(body);
 
+  //assign body
   Object.assign(init, { method: httpMethod, mode: "cors", body });
 
   return init;
@@ -79,21 +78,22 @@ export async function requestAllMediaItems(
   httpMethod = "POST"
 ) {
   let nextToken;
-  // fetch a page of data from Google API
   try {
+    // fetch a page of data from Google API
     let onePageData = await requestAPageOfMediaItems(
       accessToken,
       false,
       url,
       httpMethod
     );
-    // nextToken = onePageData.nextPageToken;
 
     do {
+      //store data from response
       const storedData = filterResponseData(onePageData);
       if (storedData) {
         storeMediaItems(storedData);
       }
+
       // use the nextPageToken to get the data in the next page
       nextToken = onePageData.nextPageToken;
       onePageData = await requestAPageOfMediaItems(
@@ -116,29 +116,32 @@ async function requestAPageOfMediaItems(
   accessToken,
   pageToken = "",
   url = "https://photoslibrary.googleapis.com/v1/mediaItems:search",
-  method = "GET"
+  method = "POST"
 ) {
   const queryStrings = { access_token: accessToken };
   const request = createRequest(url, queryStrings);
   const options = createInit(accessToken, pageToken, method);
-  return fetch(request, options)
+  // const request = "https://photoslibrary.googleapis.com/v1/mediaItems";
+
+  const p = fetch(request, options)
     .then((response) => {
       const json = response.json();
-      console.log("Fetching: " + json);
+      // console.log("Fetching: " + json);
       return json;
     })
-    .catch((reject) => {
-      console.log("Error: " + reject);
-    });
+    .catch((error) => console.error(error));
+
+  return p;
 }
 
-export async function requestNewMediaItems(accessToken) {
+export async function setUpdateTime() {
   // get items that not exists in IndexedDB
   setTimeStamp(new Date());
   return getTimeStamp();
 }
 
-// return a Promise with the fulfilled value is an array of object, which has 2 property: baseUrl & productUrl
+// return a Promise with the fulfilled value
+// the value is an array of object, which has 2 property: baseUrl & productUrl
 export async function requestForSingleItem(ids, accessToken) {
   // set a list of requests
   const urls = ids.map(

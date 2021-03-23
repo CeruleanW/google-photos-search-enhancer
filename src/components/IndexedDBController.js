@@ -60,6 +60,7 @@ export async function clearData() {
 // search a keyword and return an array of matched Ids(keys)
 export async function search(keyword) {
   console.log('Keyword:' + keyword);
+  const t0 = performance.now();
 
   // request data from IndexedDB
   const db = await dbPromise;
@@ -67,6 +68,8 @@ export async function search(keyword) {
   let cursor = await store.openCursor();
   let result = [];
 
+  const t1 = performance.now();
+  console.log(`search function took ${t1 - t0} milliseconds.`);
   // loop through each media items
   while (cursor) {
     let des = cursor.value.description;
@@ -78,6 +81,7 @@ export async function search(keyword) {
     }
     cursor = await cursor.continue();
   }
+
   return result;
 }
 

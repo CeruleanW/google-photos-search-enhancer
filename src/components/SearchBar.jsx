@@ -63,8 +63,10 @@ export default function SearchBar() {
 
   const [keyword, setKeyword] = useState('');
 
-  // Search the local IndexedDB by the keyword in state, pass the base urls to Photos
+  // Search, use the keyword in state, go through the local IndexedDB, pass the base urls to Photos
   const handleSearch = () => {
+    const t0 = performance.now();
+    console.log(`Search start: ${t0} milliseconds`);
     // No input in the searchbar
     if (!keyword) {
       return false;
@@ -72,7 +74,8 @@ export default function SearchBar() {
 
     // show the progress feedback
     updateIsSearching(true);
-    // reset search result to zero
+
+    // reset search result to null
     updateSearchedIds([]);
 
     // pass keyword to search media items from IndexedDB

@@ -3,7 +3,7 @@ import React from 'react';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import * as credentials from './credentials.json';
 import { getTimeStamp } from './IndexedDBController';
-import { requestAllMediaItems, requestNewMediaItems } from './GapiConnection';
+import { requestAllMediaItems, setUpdateTime } from './GapiConnection';
 import { Button } from '@material-ui/core';
 import { useAccessUpdate, useAccess } from './Context/AccessContext';
 import { useFeedbackUpdate } from './Context/FeedbackContext';
@@ -27,7 +27,7 @@ export default function GoogleBtn(props) {
   const updateIsLogined = useAccessUpdate().handleIsLogined;
   const isLogined = useAccess().isLogined;
 
-  // login, get the access token
+  // get the access token from Google
   const login = (response) => {
     if (response.accessToken) {
       updateIsLogined(true);
@@ -50,7 +50,7 @@ export default function GoogleBtn(props) {
     alert('Failed to log out');
   };
 
-  // must run after the log-in is completed
+  // run after the log-in is completed
   const handleRequest = (accessToken) => {
     console.log('handleRequest is called');
     const GoogleAuth = window.gapi.auth2.getAuthInstance();
@@ -62,17 +62,18 @@ export default function GoogleBtn(props) {
       requestAllMediaItems(accessToken)
         .then((fulfilled) => {
           // Update the LastUpdateView
-          props.onLastUpdateTime();
+          props.onSetLastUpdateTime();
         })
         .finally(() => {
           updateBackdrop(false);
           updateTextMessage('');
         });
     } else {
-      //get new items since last update
-      requestNewMediaItems(accessToken)
-        .then((fulfilled) => {
-          props.onLastUpdateTime();
+      //TODO: get new items since last update
+
+      setUpdateTime()
+        .then(() => {
+          props.onSetLastUpdateTime();
         })
         .finally(() => {
           updateBackdrop(false);

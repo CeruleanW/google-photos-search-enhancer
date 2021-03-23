@@ -1,7 +1,6 @@
 import AppBar from '@material-ui/core/AppBar';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
 import GoogleBtn from './GoogleBtn';
@@ -110,7 +109,7 @@ export default function MyAppBar() {
   const [severity, setSeverity] = useState(undefined);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [openUpdateAlertDialog, setOpenUpdateAlertDialog] = useState(false);
-  const [isUpdateAgreed, setIsUpdateAgreed] = useState(undefined);
+  const [isUpdateRequestAgreed, setIsUpdateRequestAgreed] = useState(undefined);
 
   // Update SnackPack 
   React.useEffect(() => {
@@ -126,13 +125,14 @@ export default function MyAppBar() {
     }
   }, [snackPack, messageInfo, isSnackbarOpen]);
 
-  // Update local data after it's confirmed 
+  // Update local data when update request is confrimed
   React.useEffect(() => {
-    if (isUpdateAgreed === true) {
+    if (isUpdateRequestAgreed === true) {
       updateFeedback.handleBackdrop(true);
       updateFeedback.handleTextMessage(
         'Updating local data... Please wait for a while'
       );
+      
       requestAllMediaItems(accessToken)
         .then((fulfilled) => {
           console.log('Update completed!');
@@ -144,9 +144,9 @@ export default function MyAppBar() {
           updateFeedback.handleBackdrop(false);
           updateFeedback.handleTextMessage('');
         });
-      setIsUpdateAgreed(undefined);
+      setIsUpdateRequestAgreed(undefined);
     }
-  }, [isUpdateAgreed, accessToken, updateFeedback]);
+  }, [isUpdateRequestAgreed, accessToken, updateFeedback]);
 
   React.useEffect(() => {
     // If it's the first time
@@ -201,7 +201,6 @@ export default function MyAppBar() {
 
   return (
     <div>
-      <CssBaseline />
       <AppBar
         position='sticky'
         className={clsx(classes.appBar, {
@@ -256,7 +255,7 @@ export default function MyAppBar() {
               lg={3}
             >
               <GoogleBtn
-                onLastUpdateTime={() => setLastUpdateTime(getTimeStamp())}
+                onSetLastUpdateTime={() => setLastUpdateTime(getTimeStamp())}
                 lastUpdateTime={lastUpdateTime}
               />
             </Grid>
@@ -333,7 +332,7 @@ export default function MyAppBar() {
       <MyDialog
         open={openUpdateAlertDialog}
         onClose={() => setOpenUpdateAlertDialog(false)}
-        onAgreed={(isAgreed) => setIsUpdateAgreed(isAgreed)}
+        onAgreed={(isAgreed) => setIsUpdateRequestAgreed(isAgreed)}
       >
         <Typography color='textPrimary'>
         Depending on the quantity of items in your Google Photos Library, the updating time could be up to a few minutes. Are you sure to update?

@@ -54,8 +54,11 @@ export default function Photos(props) {
   const [loadingPhotos, setLoadingPhotos] = useState(true);
   const photoUrls = useUrl().photoUrls;
 
+
+  // TODO: because async requests after searching for displaying, we have to wait
+  // should fix the timeout logic later
   useEffect(() => {
-    setLoadingPhotos(true);
+    // setLoadingPhotos(true);
 
     const timer = setTimeout(() => {
       setLoadingPhotos(false);
