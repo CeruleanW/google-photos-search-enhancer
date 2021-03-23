@@ -58,7 +58,6 @@ const useStyles = makeStyles((theme) => ({
 
 const CenterBackground = (props) => {
   const classes = useStyles();
-  const content = 'Search the description & filename of photos';
   return (
     <div className={classes.centerText + ' ' + classes.centerLayout}>
       <img src={icon} alt='search-icon' className={classes.image} />
