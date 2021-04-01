@@ -3,7 +3,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
 import { makeStyles, fade } from '@material-ui/core/styles';
 import { Button, Grid } from '@material-ui/core';
-import { search } from './IndexedDBController';
+import { searchForItems } from './indexedDBController';
 import { requestForSingleItem } from './GapiConnection';
 import { useAccess } from './Context/AccessContext';
 import { useUrlUpdate } from './Context/UrlsContext';
@@ -67,6 +67,7 @@ export default function SearchBar() {
   const handleSearch = () => {
     const t0 = performance.now();
     console.log(`Search start: ${t0} milliseconds`);
+
     // No input in the searchbar
     if (!keyword) {
       return false;
@@ -78,11 +79,11 @@ export default function SearchBar() {
     // reset search result to null
     updateSearchedIds([]);
 
-    // pass keyword to search media items from IndexedDB
+    // send keyword to search media items from IndexedDB
     // get the image URLs
-    search(keyword)
+    searchForItems(keyword)
       .then((fulfilled) => {
-        const ids = fulfilled;
+        const ids = fulfilled.map( data => data.item.id);
         updateSearchedIds(ids);
         if (!ids.length) {
           // display a error feedback
@@ -134,7 +135,11 @@ export default function SearchBar() {
         />
       </Grid>
       <Grid item>
-        <Button variant='contained' onClick={handleSearch} disabled={!isLogined}>
+        <Button
+          variant='contained'
+          onClick={handleSearch}
+          disabled={!isLogined}
+        >
           Search
         </Button>
       </Grid>

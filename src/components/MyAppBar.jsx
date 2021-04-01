@@ -15,9 +15,9 @@ import Typography from '@material-ui/core/Typography';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { Box, Grid, IconButton, Snackbar } from '@material-ui/core';
 import clsx from 'clsx';
-import { clearData } from './IndexedDBController';
+import { clearData } from './indexedDBController';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { getTimeStamp, setTimeStamp, checkNotFirstVisit } from './IndexedDBController';
+import { getTimeStamp, setTimeStamp, checkNotFirstVisit } from './indexedDBController';
 import {
   requestAllMediaItems,
   controller,

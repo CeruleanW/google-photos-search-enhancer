@@ -2,7 +2,7 @@
 import React from 'react';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import * as credentials from './credentials.json';
-import { getTimeStamp } from './IndexedDBController';
+import { getTimeStamp } from './indexedDBController';
 import { requestAllMediaItems, setUpdateTime } from './GapiConnection';
 import { Button } from '@material-ui/core';
 import { useAccessUpdate, useAccess } from './Context/AccessContext';
