@@ -1,3 +1,4 @@
+import { Title } from './Title';
 import AppBar from '@material-ui/core/AppBar';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -7,7 +8,6 @@ import GoogleBtn from './GoogleBtn';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import MenuIcon from '@material-ui/icons/Menu';
 import React, { useState } from 'react';
 import SearchBar from './SearchBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -15,18 +15,20 @@ import Typography from '@material-ui/core/Typography';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { Box, Grid, IconButton, Snackbar } from '@material-ui/core';
 import clsx from 'clsx';
-import { clearData } from './indexedDBController';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { getTimeStamp, setTimeStamp, checkNotFirstVisit } from './indexedDBController';
 import {
-  requestAllMediaItems,
-  controller,
-} from './GapiConnection';
+  clearData,
+  getTimeStamp,
+  setTimeStamp,
+  checkNotFirstVisit,
+} from './lib/indexedDBController';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { requestAllMediaItems } from './lib/GapiConnection';
 import { useAccess } from './Context/AccessContext';
 import { useFeedbackUpdate } from './Context/FeedbackContext';
 import MuiAlert from '@material-ui/lab/Alert';
 import HelpModal from './HelpModal';
 import MyDialog from './MyDialog';
+import { formatDate } from './lib/processor';
 
 export default function MyAppBar() {
   // Styles
@@ -45,12 +47,6 @@ export default function MyAppBar() {
         easing: theme.transitions.easing.easeOut,
         duration: theme.transitions.duration.enteringScreen,
       }),
-    },
-    menuButton: {
-      marginRight: theme.spacing(2),
-    },
-    hide: {
-      display: 'none',
     },
     drawer: {
       width: drawerWidth,
@@ -78,14 +74,6 @@ export default function MyAppBar() {
       }),
       marginLeft: 0,
     },
-    title: {
-      [theme.breakpoints.down('xs')]: {
-        fontSize: '1rem',
-      },
-      [theme.breakpoints.up('lg')]: {
-        fontSize: '1.2rem',
-      },
-    },
     offset: theme.mixins.toolbar,
   }));
   const classes = useStyles();
@@ -111,7 +99,7 @@ export default function MyAppBar() {
   const [openUpdateAlertDialog, setOpenUpdateAlertDialog] = useState(false);
   const [isUpdateRequestAgreed, setIsUpdateRequestAgreed] = useState(undefined);
 
-  // Update SnackPack 
+  // Update SnackPack
   React.useEffect(() => {
     if (snackPack.length) {
       // Set a new snack when we don't have an active one
@@ -132,7 +120,7 @@ export default function MyAppBar() {
       updateFeedback.handleTextMessage(
         'Updating local data... Please wait for a while'
       );
-      
+
       requestAllMediaItems(accessToken)
         .then((fulfilled) => {
           console.log('Update completed!');
@@ -174,27 +162,6 @@ export default function MyAppBar() {
     ]);
   };
 
-  const formatDate = (date) => {
-    const d = new Date(date);
-    const addZero = (input) => {
-      if (input.length < 2) input = '0' + input;
-    };
-    let month = '' + (d.getMonth() + 1),
-      day = '' + d.getDate(),
-      year = d.getFullYear(),
-      hours = '' + d.getHours(),
-      minutes = '' + d.getMinutes(),
-      seconds = '' + d.getSeconds();
-
-    addZero(month);
-    addZero(day);
-    addZero(hours);
-    addZero(minutes);
-    addZero(seconds);
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
-
   const handleHelpModalClose = () => {
     setIsHelpModalOpen(false);
   };
@@ -218,21 +185,11 @@ export default function MyAppBar() {
               md={5}
               xs={12}
             >
-              <IconButton
-                color='inherit'
-                aria-label='open drawer'
-                onClick={() => setIsDrawerOpen(true)}
-                edge='start'
-                className={clsx(
-                  classes.menuButton,
-                  isDrawerOpen && classes.hide
-                )}
-              >
-                <MenuIcon />
-              </IconButton>
-              <Typography variant='h6' className={classes.title}>
-                Google Photos Search Enhancer
-              </Typography>
+              <Title
+                setIsDrawerOpen={setIsDrawerOpen}
+                clsx={clsx}
+                isDrawerOpen={isDrawerOpen}
+              />
             </Grid>
             <Grid
               container
@@ -273,7 +230,7 @@ export default function MyAppBar() {
       >
         <div className={classes.drawerHeader}>
           <IconButton onClick={() => setIsDrawerOpen(false)}>
-            {(theme.direction === 'ltr') ? (
+            {theme.direction === 'ltr' ? (
               <ChevronLeftIcon />
             ) : (
               <ChevronRightIcon />
@@ -282,18 +239,19 @@ export default function MyAppBar() {
         </div>
         <Divider />
         <List>
-          <ListItem button onClick={() => setOpenUpdateAlertDialog(true)} disabled={!isLogined}>
+          <ListItem
+            button
+            onClick={() => setOpenUpdateAlertDialog(true)}
+            disabled={!isLogined}
+          >
             <ListItemText primary='Update data' />
           </ListItem>
           <ListItem button onClick={handleClear} disabled={!lastUpdateTime}>
             <ListItemText primary='Clear data' />
           </ListItem>
-          {/* <ListItem button onClick={controller.abort}>
-            <ListItemText primary='Stop' />
-          </ListItem> */}
           <ListItem
             button
-            onClick={ () => setIsHelpModalOpen(true) }
+            onClick={() => setIsHelpModalOpen(true)}
             disabled={isHelpModalOpen}
           >
             <ListItemText primary='Help' />
@@ -311,7 +269,6 @@ export default function MyAppBar() {
           {lastUpdateTime ? formatDate(lastUpdateTime) : 'No data'}
         </Typography>
       </Drawer>
-
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         open={isSnackbarOpen}
@@ -327,7 +284,6 @@ export default function MyAppBar() {
           {messageInfo}
         </MuiAlert>
       </Snackbar>
-
       <HelpModal open={isHelpModalOpen} onClose={handleHelpModalClose} />
       <MyDialog
         open={openUpdateAlertDialog}
@@ -335,7 +291,8 @@ export default function MyAppBar() {
         onAgreed={(isAgreed) => setIsUpdateRequestAgreed(isAgreed)}
       >
         <Typography color='textPrimary'>
-        Depending on the quantity of items in your Google Photos Library, the updating time could be up to a few minutes. Are you sure to update?
+          Depending on the quantity of items in your Google Photos Library, the
+          updating time could be up to a few minutes. Are you sure to update?
         </Typography>
       </MyDialog>
     </div>

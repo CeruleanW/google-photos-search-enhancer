@@ -2,8 +2,8 @@
 import React from 'react';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import * as credentials from './credentials.json';
-import { getTimeStamp } from './indexedDBController';
-import { requestAllMediaItems, setUpdateTime } from './GapiConnection';
+import { getTimeStamp } from './lib/indexedDBController';
+import { requestAllMediaItems, setUpdateTime } from './lib/GapiConnection';
 import { Button } from '@material-ui/core';
 import { useAccessUpdate, useAccess } from './Context/AccessContext';
 import { useFeedbackUpdate } from './Context/FeedbackContext';

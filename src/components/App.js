@@ -8,16 +8,14 @@ import Main from './Main';
 
 export default function App() {
   return (
-    <div>
-      <AccessProvider>
-        <UrlsProvider>
-          <FeedbackProvider>
-            <CssBaseline />
-            <Main />
-            <Footer />
-          </FeedbackProvider>
-        </UrlsProvider>
-      </AccessProvider>
-    </div>
+    <AccessProvider>
+      <UrlsProvider>
+        <FeedbackProvider>
+          <CssBaseline />
+          <Main />
+          <Footer />
+        </FeedbackProvider>
+      </UrlsProvider>
+    </AccessProvider>
   );
 }

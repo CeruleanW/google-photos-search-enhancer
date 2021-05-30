@@ -1,6 +1,5 @@
 import React from 'react';
-// Library Link: https://www.npmjs.com/package/react-sticky-footer
-import StickyFooter from 'react-sticky-footer';
+import StickyFooter from 'react-sticky-footer'; // Library Link: https://www.npmjs.com/package/react-sticky-footer
 import { Container, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
