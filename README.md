@@ -37,7 +37,10 @@ The code is available under the [MIT license](LICENSE).
 npm install --save-dev @material-ui/core @material-ui/icons react-google-login idb react-masonry-css react-sticky-footer
 ```
 
-
+## What it will do
+- sign in your google account and request data from Google Photos
+- store the meta data and photo urls in client storage (IndexedDB)
+- perform searching on local data
 
 ## Others
 
