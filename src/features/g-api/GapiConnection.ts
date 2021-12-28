@@ -1,35 +1,17 @@
 /* global gapi */
-import {
-  storeMediaItems,
-  setTimeStamp,
-  getTimeStamp,
-} from "./indexedDBController";
-
-export const controller = new AbortController();
-const signal = controller.signal;
-
-const createBaseInit = (accessToken) => {
-  let myHeaders = {};
-  Object.assign(myHeaders, { "Content-Type": "application/json" });
-  Object.assign(myHeaders, { Authorization: `Bearer ${accessToken}` });
-
-  const baseInit = {
-    headers: myHeaders,
-    mode: "cors",
-    signal,
-  };
-
-  return baseInit;
-};
+// https://developers.google.com/photos/library/guides/access-media-items
+import { storeMediaItems, setTimeStamp, getTimeStamp } from '../client-storage';
+import { createBaseInit } from '../auth';
+import { converObjectToQueryString, fetchData, sendPost} from '../request';
 
 // return an init object for Fetch
-const createInit = (
+function createInit(
   accessToken,
   pageToken,
-  httpMethod = "POST",
+  httpMethod = 'POST',
   filters = { includeArchivedMedia: true },
   pageSize = 100
-) => {
+) {
   let init = createBaseInit(accessToken);
 
   // create body
@@ -40,52 +22,47 @@ const createInit = (
   if (pageToken) {
     Object.assign(body, { pageToken: pageToken });
   }
-  body = JSON.stringify(body);
+  const bodyString = JSON.stringify(body);
 
   //assign body
-  Object.assign(init, { method: httpMethod, mode: "cors", body });
+  Object.assign(init, { method: httpMethod, mode: 'cors', body: bodyString });
 
   return init;
-};
+}
 
-const createRequest = (
-  apiURL = "https://photoslibrary.googleapis.com/v1/mediaItems",
+function createRequest(
+  apiURL = 'https://photoslibrary.googleapis.com/v1/mediaItems',
   queryStrings
-) => {
+) {
   let url = apiURL;
   if (queryStrings) {
-    url += "?" + objectToQueryString(queryStrings);
+    url += '?' + converObjectToQueryString(queryStrings);
   }
   return url;
-};
+}
 
-const createRequestForSingleItem = (url, accessToken) => {
+function createSingleItemUrl(url, accessToken) {
   return `${url}?access_token=${accessToken}`;
-};
-
-const objectToQueryString = (obj) => {
-  return Object.keys(obj)
-    .map((key) => key + "=" + obj[key])
-    .join("&");
-};
+}
 
 // request for all media items and store the result in the IndexedDB
 // return the setted time stamp
 // Default: include archived items
 export async function requestAllMediaItems(
   accessToken,
-  url = "https://photoslibrary.googleapis.com/v1/mediaItems:search",
-  httpMethod = "POST"
+  url = 'https://photoslibrary.googleapis.com/v1/mediaItems:search',
+  httpMethod = 'POST'
 ) {
   let nextToken;
   try {
     // fetch a page of data from Google API
     let onePageData = await requestAPageOfMediaItems(
       accessToken,
-      false,
+      null,
       url,
       httpMethod
     );
+    console.table('onePageData: ', onePageData);
 
     do {
       //store data from response
@@ -104,52 +81,60 @@ export async function requestAllMediaItems(
       );
     } while (nextToken);
   } catch (err) {
-    console.log(err.name + ": " + err.message);
+    console.log(err.name + ': ' + err.message);
   }
 
-  setTimeStamp(new Date());
+  setTimeStamp();
   return getTimeStamp();
 }
 
 // return a Promise wrapping the response JSON
 async function requestAPageOfMediaItems(
   accessToken,
-  pageToken = "",
-  url = "https://photoslibrary.googleapis.com/v1/mediaItems:search",
-  method = "POST"
+  pageToken = '',
+  url = 'https://photoslibrary.googleapis.com/v1/mediaItems:search',
+  method = 'POST'
 ) {
-  const queryStrings = { access_token: accessToken };
-  const request = createRequest(url, queryStrings);
-  const options = createInit(accessToken, pageToken, method);
+  const processedUrl = accessToken ? `${url}?access_token=${accessToken}` : url;
+
+  // const options = createInit(accessToken, pageToken, method);
+  const options = {
+    filters: { includeArchivedMedia: true },
+    pageSize: 100,
+    pageToken: pageToken ? pageToken : null,
+  };
+  console.log('options: ', options);
   // const request = "https://photoslibrary.googleapis.com/v1/mediaItems";
 
-  const p = fetch(request, options)
-    .then((response) => {
-      const json = response.json();
-      // console.log("Fetching: " + json);
-      return json;
-    })
-    .catch((error) => console.error(error));
+  const data = await sendPost(processedUrl, options);
+  // const p = fetch(processedUrl, options)
+  //   .then((response) => {
+  //     const json = response.json();
+  //     // console.log("Fetching: " + json);
+  //     return json;
+  //   })
+  //   .catch((error) => console.error(error));
 
-  return p;
+  return data;
 }
 
 export async function setUpdateTime() {
   // get items that not exists in IndexedDB
-  setTimeStamp(new Date());
+  setTimeStamp();
   return getTimeStamp();
 }
 
 // return a Promise with the fulfilled value
 // the value is an array of object, which has 2 property: baseUrl & productUrl
-export async function requestForSingleItem(ids, accessToken) {
+export async function requestForSingleItem(
+  ids: string[],
+  accessToken: string
+): Promise<{ baseUrl: string; productUrl: string }[]> {
   // set a list of requests
   const urls = ids.map(
     (id) => `https://photoslibrary.googleapis.com/v1/mediaItems/${id}`
   );
-  const requests = urls.map((url) =>
-    createRequestForSingleItem(url, accessToken)
-  );
+  const requests = urls.map((url) => createSingleItemUrl(url, accessToken));
   const fetches = requests.map((request) =>
     fetch(request).then((fulfilled) => fulfilled.json())
   );
@@ -162,26 +147,6 @@ export async function requestForSingleItem(ids, accessToken) {
     });
     return resultUrls;
   });
-}
-
-// take a list of base urls, return a list of image blob urls
-export async function requestImages(urls, accessToken) {
-  let data = [];
-  const simpleOptions = createBaseInit(accessToken);
-  // fetch each url and push the blob in response to data
-  await urls.forEach((url) => {
-    fetch(url, simpleOptions)
-      .then((response) => {
-        const blobResponse = response.blob();
-        data.push(blobResponse);
-      })
-      .catch((error) => console.log(error));
-  });
-
-  const urlCreator = window.URL || window.webkitURL;
-  const result = data.map((blob) => urlCreator.createObjectURL(blob));
-
-  return result;
 }
 
 function filterResponseData(responseJson) {

@@ -3,8 +3,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
 import { makeStyles, fade } from '@material-ui/core/styles';
 import { Button, Grid } from '@material-ui/core';
-import { searchForItems } from './lib/indexedDBController';
-import { requestForSingleItem } from './lib/GapiConnection';
+import { searchForItems } from '../features/client-storage';
+import { requestForSingleItem } from '../features/g-api/GapiConnection';
 import { useAccess } from './Context/AccessContext';
 import { useUrlUpdate } from './Context/UrlsContext';
 import { useFeedbackUpdate } from './Context/FeedbackContext';
@@ -94,7 +94,7 @@ export default function SearchBar() {
 
         // request for the base urls and the product urls
         requestForSingleItem(ids, accessToken).then((urls) => {
-          console.log(urls);
+          // console.log(urls);
           // send the base urls in response to App
           updatePhotoUrls(urls);
         });

@@ -90,10 +90,10 @@ export default function Photos(props) {
           {props.ids.map((id, index) => (
             <img
               key={id}
-              src={`${photoUrls[index].baseUrl}=w640-h640`}
+              src={`${photoUrls[index]?.baseUrl}=w640-h640`}
               alt='Google Photos'
               className={classes.image}
-              onClick={() => handleClick(photoUrls[index].productUrl)}
+              onClick={() => handleClick(photoUrls[index]?.productUrl)}
             />
           ))}
         </Masonry>

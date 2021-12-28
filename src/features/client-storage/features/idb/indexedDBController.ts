@@ -3,39 +3,18 @@ import Fuse from 'fuse.js';
 
 let dbPromise = createDatabase();
 
-export function checkNotFirstVisit() {
-  if (!localStorage.noFirstVisit) {
-    console.log('first time');
-    localStorage.noFirstVisit = '1';
-    return false;
-  }
-  return localStorage.noFirstVisit;
-}
-
-export function setTimeStamp(isUpdated = true) {
-  if (isUpdated) {
-    localStorage.setItem('updateTime', new Date());
-  } else {
-    localStorage.setItem('updateTime', '');
-  }
-}
-
-// return a date object or a empty string
-export function getTimeStamp() {
-  return localStorage.getItem('updateTime');
-}
+const objectStoreName = 'localMediaItems';
 
 // Create a database with a 'localMediaItems' object store
 export function createDatabase() {
   const dbPromise = openDB('db', 1, {
     upgrade(db) {
-      db.createObjectStore('localMediaItems', {
+      db.createObjectStore(objectStoreName, {
         keyPath: 'id',
         autoIncrement: true,
       });
     },
   });
-  setTimeStamp();
 
   return dbPromise;
 }
@@ -43,7 +22,7 @@ export function createDatabase() {
 // store an array
 export async function storeMediaItems(mediaItems) {
   const db = await dbPromise;
-  const tx = db.transaction('localMediaItems', 'readwrite');
+  const tx = db.transaction(objectStoreName, 'readwrite');
   mediaItems.forEach((value) => {
     return new Promise((resolve, reject) => {
       resolve(tx.store.put(value));
@@ -55,7 +34,7 @@ export async function storeMediaItems(mediaItems) {
 
 export async function clearData() {
   const db = await dbPromise;
-  return db.clear('localMediaItems');
+  return db.clear(objectStoreName);
 }
 
 // search a keyword and return an array of matched Ids(keys)
@@ -65,23 +44,24 @@ export async function search(keyword) {
 
   // request data from IndexedDB
   const db = await dbPromise;
-  let store = db.transaction('localMediaItems').store;
-  let cursor = await store.openCursor();
+  let store = db.transaction(objectStoreName).store;
+  let cursor = await store.openCursor() as any;
   // let result = [];
 
   const t1 = performance.now();
   console.log(`search function took ${t1 - t0} milliseconds.`);
-  
+
   // perform the search
 
   const options = {
     includeScore: true,
     // Search in `author` and in `tags` array
-    keys: ['author', 'tags']
-  }
-  
-  const fuse = new Fuse(cursor, options)
-  
+    keys: ['author', 'tags'],
+  };
+
+  //ts-ignore
+  const fuse = new Fuse(cursor, options);
+
   const result = fuse.search('tion');
   // loop through each media items
   // while (cursor) {
@@ -98,26 +78,25 @@ export async function search(keyword) {
   return result;
 }
 
-
 export async function searchForItems(keyword) {
   console.log('Keyword:' + keyword);
   const t0 = performance.now();
 
   // request data from IndexedDB
   const db = await dbPromise;
-  const request = await db.getAll('localMediaItems'); // an array of all data objects
+  const request = await db.getAll(objectStoreName); // an array of all data objects
 
   // execute the search
   const options = {
     includeScore: true,
-    keys: ['filename', 'description']
-  }
-  const fuse = new Fuse(request, options)
+    keys: ['filename', 'description'],
+  };
+  const fuse = new Fuse(request, options);
   const result = fuse.search(keyword);
   // console.log('results: ' + JSON.stringify(result));
 
   const t1 = performance.now();
   console.log(`search function took ${t1 - t0} milliseconds.`);
-  
+
   return result;
 }

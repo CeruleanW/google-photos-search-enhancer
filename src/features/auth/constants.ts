@@ -1,4 +1,4 @@
-{
+export const credentials = {
   "web": {
     "client_id": "1021859068960-64oa03fggpfb22tau6tatqir94ft44vt.apps.googleusercontent.com",
     "project_id": "search-chinese-1595873063241",

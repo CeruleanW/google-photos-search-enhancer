@@ -37,7 +37,7 @@ export default function Footer() {
             href='https://github.com/CeruleanW'
           >
             {' '}
-            Yi Yang
+            Asher Yang
           </a>
         </Typography>
       </Container>

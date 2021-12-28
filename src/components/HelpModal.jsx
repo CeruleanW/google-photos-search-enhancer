@@ -78,7 +78,7 @@ export default function HelpModal(props) {
             </ul>
           </Box>
           <Divider/>
-          <BodyPara align='right' className={classes.footNote}>For further help, please send email to yangyi621#outlook.com &#40;replace # by @&#41;</BodyPara>
+          <BodyPara align='right' className={classes.footNote}>For further help, please send email to yyang.techie#gmail.com &#40;replace # by @&#41;</BodyPara>
         </Box>
       </Container>
     </Modal>

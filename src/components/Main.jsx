@@ -1,15 +1,15 @@
 import React from 'react';
-import MyAppBar from './MyAppBar';
+import { AppBar } from './AppBar';
 import Photos from './Photos';
 import SimpleBackdrop from './Backdrop';
 import { Box, LinearProgress } from '@material-ui/core/';
 import { useFeedback } from './Context/FeedbackContext';
 import { makeStyles } from '@material-ui/core/styles';
 import { useUrl } from './Context/UrlsContext';
-import icon from '../images/icons8-search-500.png';
 import NoMatchedSnackbar from './NoMatchedSnackbar';
+import { CenterBackground } from './CenterBackground';
 
-const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles((theme) => ({
   main: {
     minHeight: '94vh',
   },
@@ -40,15 +40,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CenterBackground = (props) => {
-  const classes = useStyles();
-  return (
-    <div className={classes.centerText + ' ' + classes.centerLayout}>
-      <img src={icon} alt='search-icon' className={classes.image} />
-    </div>
-  );
-};
-
 export default function Main() {
   const classes = useStyles();
 
@@ -57,7 +48,7 @@ export default function Main() {
 
   return (
     <Box className={classes.main}>
-      <MyAppBar />
+      <AppBar />
       {ids && ids.length ? <Photos ids={ids} /> : <CenterBackground />}
       <NoMatchedSnackbar />
       <SimpleBackdrop />

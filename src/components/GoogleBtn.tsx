@@ -1,9 +1,10 @@
 /* global gapi */
 import React from 'react';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
-import * as credentials from './credentials.json';
-import { getTimeStamp } from './lib/indexedDBController';
-import { requestAllMediaItems, setUpdateTime } from './lib/GapiConnection';
+import { credentials } from '../features/auth';
+import { getTimeStamp } from '../features/client-storage';
+import { requestAllMediaItems, setUpdateTime } from '../features/g-api';
+import {setAxiosDefaultAuthHeader} from '../features/request';
 import { Button } from '@material-ui/core';
 import { useAccessUpdate, useAccess } from './Context/AccessContext';
 import { useFeedbackUpdate } from './Context/FeedbackContext';
@@ -29,9 +30,11 @@ export default function GoogleBtn(props) {
 
   // get the access token from Google
   const login = (response) => {
-    if (response.accessToken) {
+    if (response?.accessToken) {
+      const token = response.accessToken;
       updateIsLogined(true);
       updateAccessToken(response.accessToken);
+      setAxiosDefaultAuthHeader(token);
       // start request
       handleRequest(response.accessToken);
     }
@@ -46,6 +49,7 @@ export default function GoogleBtn(props) {
   const handleLoginFailure = (response) => {
     alert('Failed to log in');
   };
+  
   const handleLogoutFailure = (response) => {
     alert('Failed to log out');
   };
@@ -53,11 +57,12 @@ export default function GoogleBtn(props) {
   // run after the log-in is completed
   const handleRequest = (accessToken) => {
     console.log('handleRequest is called');
-    const GoogleAuth = window.gapi.auth2.getAuthInstance();
 
     // If it's the first time that the user login
     if (!getTimeStamp()) {
-      updateTextMessage('Initializing Local Data Storage. This may take long time depends the quantity of media items in your library');
+      updateTextMessage(
+        'Initializing Local Data Storage. This may take long time depends the quantity of media items in your library'
+      );
       updateBackdrop(true);
       requestAllMediaItems(accessToken)
         .then((fulfilled) => {
@@ -89,7 +94,7 @@ export default function GoogleBtn(props) {
           clientId={oauth2.clientID}
           onLogoutSuccess={logout}
           buttonText='Logout'
-          onFailure={handleLogoutFailure}
+          // onFailure={handleLogoutFailure}
           render={(renderProps) => (
             <Button
               variant='contained'
@@ -99,7 +104,7 @@ export default function GoogleBtn(props) {
               Logout
             </Button>
           )}
-          cookiePolicy={'single_host_origin'}
+          // cookiePolicy={'single_host_origin'}
         />
       ) : (
         <GoogleLogin
