@@ -23,3 +23,9 @@ export function setTimeStamp(isUpdated = true) {
 export function getTimeStamp() {
   return localStorage.getItem('updateTime');
 }
+
+export async function setUpdateTime() {
+  // get items that not exists in IndexedDB
+  setTimeStamp();
+  return getTimeStamp();
+}

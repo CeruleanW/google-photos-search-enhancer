@@ -1,9 +1,8 @@
-/* global gapi */
 import React from 'react';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import { credentials } from '../features/auth';
-import { getTimeStamp } from '../features/client-storage';
-import { requestAllMediaItems, setUpdateTime } from '../features/g-api';
+import { getTimeStamp, setUpdateTime } from '../features/client-storage';
+import { requestAllMediaItems } from '../features/g-api';
 import {setAxiosDefaultAuthHeader} from '../features/request';
 import { Button } from '@material-ui/core';
 import { useAccessUpdate, useAccess } from './Context/AccessContext';
@@ -49,7 +48,7 @@ export default function GoogleBtn(props) {
   const handleLoginFailure = (response) => {
     alert('Failed to log in');
   };
-  
+
   const handleLogoutFailure = (response) => {
     alert('Failed to log out');
   };

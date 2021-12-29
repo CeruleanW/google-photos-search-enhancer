@@ -5,17 +5,20 @@ import FeedbackProvider from './components/Context/FeedbackContext';
 import Footer from './components/atomic/Footer';
 import UrlsProvider from './components/Context/UrlsContext';
 import Main from './components/Main';
+import { ReduxProvicer } from './providers/redux';
 
 export default function App() {
   return (
-    <AccessProvider>
-      <UrlsProvider>
-        <FeedbackProvider>
-          <CssBaseline />
-          <Main />
-          <Footer />
-        </FeedbackProvider>
-      </UrlsProvider>
-    </AccessProvider>
+    <ReduxProvicer>
+      <AccessProvider>
+        <UrlsProvider>
+          <FeedbackProvider>
+            <CssBaseline />
+            <Main />
+            <Footer />
+          </FeedbackProvider>
+        </UrlsProvider>
+      </AccessProvider>
+    </ReduxProvicer>
   );
 }

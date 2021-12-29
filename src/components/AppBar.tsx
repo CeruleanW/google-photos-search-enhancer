@@ -29,6 +29,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 import HelpModal from './HelpModal';
 import MyDialog from './MyDialog';
 import { formatDate } from '../features/date/processor';
+import {RandomBtn} from '../features/random/components/RandomBtn';
 
 export function AppBar() {
 
@@ -177,11 +178,11 @@ export function AppBar() {
         })}
       >
         <Toolbar>
-          <Grid container alignItems='center' justify='flex-start' spacing={1}>
+          <Grid container alignItems='center' justifyContent='flex-start' spacing={1}>
             <Grid
               container
               item
-              justify='flex-start'
+              justifyContent='flex-start'
               alignItems='center'
               lg={4}
               md={5}
@@ -197,18 +198,19 @@ export function AppBar() {
               container
               item
               alignItems='center'
-              justify='flex-start'
+              justifyContent='flex-start'
               lg={5}
               md={6}
               xs={12}
             >
               <SearchBar />
+              <RandomBtn />
             </Grid>
             <Grid
               container
               item
               alignItems='center'
-              justify={justifyStyle}
+              justifyContent={justifyStyle}
               xs={12}
               md={1}
               lg={3}

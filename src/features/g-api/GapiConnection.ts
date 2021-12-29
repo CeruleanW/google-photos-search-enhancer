@@ -1,45 +1,8 @@
-/* global gapi */
 // https://developers.google.com/photos/library/guides/access-media-items
-import { storeMediaItems, setTimeStamp, getTimeStamp } from '../client-storage';
-import { createBaseInit } from '../auth';
-import { converObjectToQueryString, fetchData, sendPost} from '../request';
-
-// return an init object for Fetch
-function createInit(
-  accessToken,
-  pageToken,
-  httpMethod = 'POST',
-  filters = { includeArchivedMedia: true },
-  pageSize = 100
-) {
-  let init = createBaseInit(accessToken);
-
-  // create body
-  let body = {
-    filters,
-    pageSize,
-  };
-  if (pageToken) {
-    Object.assign(body, { pageToken: pageToken });
-  }
-  const bodyString = JSON.stringify(body);
-
-  //assign body
-  Object.assign(init, { method: httpMethod, mode: 'cors', body: bodyString });
-
-  return init;
-}
-
-function createRequest(
-  apiURL = 'https://photoslibrary.googleapis.com/v1/mediaItems',
-  queryStrings
-) {
-  let url = apiURL;
-  if (queryStrings) {
-    url += '?' + converObjectToQueryString(queryStrings);
-  }
-  return url;
-}
+import { setMediaItems, setTimeStamp, getTimeStamp } from '../client-storage';
+import { sendPost } from '../request';
+import { LocalMediaItem } from './types';
+import {MEDIA_ITEMS_SEARCH_API, MEDIA_ITEMS_API} from './constants';
 
 function createSingleItemUrl(url, accessToken) {
   return `${url}?access_token=${accessToken}`;
@@ -50,7 +13,7 @@ function createSingleItemUrl(url, accessToken) {
 // Default: include archived items
 export async function requestAllMediaItems(
   accessToken,
-  url = 'https://photoslibrary.googleapis.com/v1/mediaItems:search',
+  url = MEDIA_ITEMS_SEARCH_API,
   httpMethod = 'POST'
 ) {
   let nextToken;
@@ -66,9 +29,9 @@ export async function requestAllMediaItems(
 
     do {
       //store data from response
-      const storedData = filterResponseData(onePageData);
+      const storedData = extractPropsInMediaItems(onePageData);
       if (storedData) {
-        storeMediaItems(storedData);
+        setMediaItems(storedData);
       }
 
       // use the nextPageToken to get the data in the next page
@@ -92,36 +55,20 @@ export async function requestAllMediaItems(
 async function requestAPageOfMediaItems(
   accessToken,
   pageToken = '',
-  url = 'https://photoslibrary.googleapis.com/v1/mediaItems:search',
+  url = MEDIA_ITEMS_SEARCH_API,
   method = 'POST'
 ) {
   const processedUrl = accessToken ? `${url}?access_token=${accessToken}` : url;
 
-  // const options = createInit(accessToken, pageToken, method);
   const options = {
     filters: { includeArchivedMedia: true },
     pageSize: 100,
     pageToken: pageToken ? pageToken : null,
   };
   console.log('options: ', options);
-  // const request = "https://photoslibrary.googleapis.com/v1/mediaItems";
 
   const data = await sendPost(processedUrl, options);
-  // const p = fetch(processedUrl, options)
-  //   .then((response) => {
-  //     const json = response.json();
-  //     // console.log("Fetching: " + json);
-  //     return json;
-  //   })
-  //   .catch((error) => console.error(error));
-
   return data;
-}
-
-export async function setUpdateTime() {
-  // get items that not exists in IndexedDB
-  setTimeStamp();
-  return getTimeStamp();
 }
 
 // return a Promise with the fulfilled value
@@ -132,7 +79,7 @@ export async function requestForSingleItem(
 ): Promise<{ baseUrl: string; productUrl: string }[]> {
   // set a list of requests
   const urls = ids.map(
-    (id) => `https://photoslibrary.googleapis.com/v1/mediaItems/${id}`
+    (id) => `${MEDIA_ITEMS_API}/${id}`
   );
   const requests = urls.map((url) => createSingleItemUrl(url, accessToken));
   const fetches = requests.map((request) =>
@@ -149,7 +96,7 @@ export async function requestForSingleItem(
   });
 }
 
-function filterResponseData(responseJson) {
+function extractPropsInMediaItems(responseJson): LocalMediaItem[] {
   const mediaItems = responseJson.mediaItems;
   return mediaItems
     ? responseJson.mediaItems.map((mediaItem) => {

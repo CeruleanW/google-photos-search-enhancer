@@ -1,13 +1,44 @@
-import { openDB } from 'idb';
+import { LocalMediaItem } from './../../../g-api/types';
+
+import { IDBPObjectStore, openDB } from 'idb'; //https://www.npmjs.com/package/idb
 import Fuse from 'fuse.js';
+
+const dbName = 'db';
+const objectStoreName = 'localMediaItems';
 
 let dbPromise = createDatabase();
 
-const objectStoreName = 'localMediaItems';
+// for general IDB usage
+async function getDatabase() {
+  const db = await openDB(dbName);
+  return db;
+}
+
+async function getObjectStore(name: string) {
+  const db = await getDatabase();
+  const store = db.transaction(name).objectStore(name);
+  return store;
+}
+
+export async function getAllKeys(
+  store: IDBPObjectStore
+): Promise<IDBValidKey[]> {
+  return await store.getAllKeys();
+}
+
+// for local media items
+export async function getLocalMediaItemsObjectStore() {
+  return await getObjectStore(objectStoreName);
+}
+
+export async function getAllKeysOfLocalMediaItems() {
+  const store = await getLocalMediaItemsObjectStore();
+  return await getAllKeys(store);
+}
 
 // Create a database with a 'localMediaItems' object store
 export function createDatabase() {
-  const dbPromise = openDB('db', 1, {
+  const dbPromise = openDB(dbName, 1, {
     upgrade(db) {
       db.createObjectStore(objectStoreName, {
         keyPath: 'id',
@@ -20,7 +51,7 @@ export function createDatabase() {
 }
 
 // store an array
-export async function storeMediaItems(mediaItems) {
+export async function setMediaItems(mediaItems: LocalMediaItem[]) {
   const db = await dbPromise;
   const tx = db.transaction(objectStoreName, 'readwrite');
   mediaItems.forEach((value) => {
@@ -37,53 +68,12 @@ export async function clearData() {
   return db.clear(objectStoreName);
 }
 
-// search a keyword and return an array of matched Ids(keys)
-export async function search(keyword) {
-  console.log('Keyword:' + keyword);
-  const t0 = performance.now();
-
-  // request data from IndexedDB
-  const db = await dbPromise;
-  let store = db.transaction(objectStoreName).store;
-  let cursor = await store.openCursor() as any;
-  // let result = [];
-
-  const t1 = performance.now();
-  console.log(`search function took ${t1 - t0} milliseconds.`);
-
-  // perform the search
-
-  const options = {
-    includeScore: true,
-    // Search in `author` and in `tags` array
-    keys: ['author', 'tags'],
-  };
-
-  //ts-ignore
-  const fuse = new Fuse(cursor, options);
-
-  const result = fuse.search('tion');
-  // loop through each media items
-  // while (cursor) {
-  //   let des = cursor.value.description;
-  //   let fileName = cursor.value.filename;
-  //   if (fileName && fileName.includes(keyword)) {
-  //     result.push(cursor.key);
-  //   } else if (des && des.includes(keyword)) {
-  //     result.push(cursor.key);
-  //   }
-  //   cursor = await cursor.continue();
-  // }
-
-  return result;
-}
-
 export async function searchForItems(keyword) {
   console.log('Keyword:' + keyword);
   const t0 = performance.now();
 
   // request data from IndexedDB
-  const db = await dbPromise;
+  const db = await getDatabase();
   const request = await db.getAll(objectStoreName); // an array of all data objects
 
   // execute the search
@@ -93,10 +83,18 @@ export async function searchForItems(keyword) {
   };
   const fuse = new Fuse(request, options);
   const result = fuse.search(keyword);
-  // console.log('results: ' + JSON.stringify(result));
 
   const t1 = performance.now();
   console.log(`search function took ${t1 - t0} milliseconds.`);
 
   return result;
+}
+
+export async function getValue(key: string): Promise<any> {
+  const db = await getDatabase();
+  const tx = db.transaction(objectStoreName, 'readonly');
+  const store = tx.objectStore(objectStoreName);
+  const val = (await store.get(key)) || null;
+  await tx.done;
+  return val;
 }

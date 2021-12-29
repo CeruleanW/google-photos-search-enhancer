@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
 import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
-import { makeStyles, fade } from '@material-ui/core/styles';
+import { makeStyles, alpha } from '@material-ui/core/styles';
 import { Button, Grid } from '@material-ui/core';
 import { searchForItems } from '../features/client-storage';
-import { requestForSingleItem } from '../features/g-api/GapiConnection';
 import { useAccess } from './Context/AccessContext';
 import { useUrlUpdate } from './Context/UrlsContext';
 import { useFeedbackUpdate } from './Context/FeedbackContext';
+import { useDispatch } from 'react-redux';
+import { requestMediaItemsByIds } from '../features/media-items';
+import { setDisplayedPhotos } from '@/providers/redux/photosSlice';
 
 const useStyles = makeStyles((theme) => ({
   search: {
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
-    backgroundColor: fade(theme.palette.common.white, 0.15),
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
     '&:hover': {
-      backgroundColor: fade(theme.palette.common.white, 0.25),
+      backgroundColor: alpha(theme.palette.common.white, 0.25),
     },
     marginRight: theme.spacing(2),
     marginLeft: 0,
@@ -53,7 +55,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SearchBar() {
+  // Hooks
   const classes = useStyles();
+  const dispatch = useDispatch();
   const accessToken = useAccess().accessToken;
   const isLogined = useAccess().isLogined;
   const updatePhotoUrls = useUrlUpdate().handlePhotoUrls;
@@ -61,10 +65,11 @@ export default function SearchBar() {
   const updateSearchedIds = useUrlUpdate().handleSearchedIds;
   const updateIsNoMatch = useFeedbackUpdate().handleIsNoMatch;
 
+  // Local state
   const [keyword, setKeyword] = useState('');
 
   // Search, use the keyword in state, go through the local IndexedDB, pass the base urls to Photos
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const t0 = performance.now();
     console.log(`Search start: ${t0} milliseconds`);
 
@@ -81,24 +86,26 @@ export default function SearchBar() {
 
     // send keyword to search media items from IndexedDB
     // get the image URLs
-    searchForItems(keyword)
-      .then((fulfilled) => {
-        const ids = fulfilled.map( data => data.item.id);
-        updateSearchedIds(ids);
-        if (!ids.length) {
-          // display a error feedback
-          updateIsNoMatch(true);
-          return 'No result';
-        }
-        updateIsSearching(false);
+    const fulfilled = await searchForItems(keyword);
+    const ids = fulfilled.map((data) => data?.item?.id);
+    updateSearchedIds(ids);
+    if (!ids?.length) {
+      // display a error feedback
+      updateIsNoMatch(true);
+      return 'No result';
+    }
+    updateIsSearching(false);
 
-        // request for the base urls and the product urls
-        requestForSingleItem(ids, accessToken).then((urls) => {
-          // console.log(urls);
-          // send the base urls in response to App
-          updatePhotoUrls(urls);
-        });
-      })
+    // request for the base urls and the product urls
+    const urls = await requestMediaItemsByIds(ids, accessToken);
+    // console.log(urls);
+    // send the base urls in response to App
+    dispatch(setDisplayedPhotos(urls));
+    updatePhotoUrls(urls);
+  };
+
+  const handleClick = () => {
+    handleSearch()
       .catch((rejected) => console.log('Error: ' + rejected))
       .finally(() => updateIsSearching(false));
   };
@@ -135,11 +142,7 @@ export default function SearchBar() {
         />
       </Grid>
       <Grid item>
-        <Button
-          variant='contained'
-          onClick={handleSearch}
-          disabled={!isLogined}
-        >
+        <Button variant='contained' onClick={handleClick} disabled={!isLogined}>
           Search
         </Button>
       </Grid>

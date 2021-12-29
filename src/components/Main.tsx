@@ -1,14 +1,17 @@
 import React from 'react';
 import { AppBar } from './AppBar';
-import Photos from './Photos';
+import PhotosContainer from './Photos';
 import SimpleBackdrop from './Backdrop';
 import { Box, LinearProgress } from '@material-ui/core/';
 import { useFeedback } from './Context/FeedbackContext';
 import { makeStyles } from '@material-ui/core/styles';
 import { useUrl } from './Context/UrlsContext';
+
 import NoMatchedSnackbar from './NoMatchedSnackbar';
 import { CenterBackground } from './CenterBackground';
+import { isFilledArray } from '../utils';
 
+// @ts-ignore
 export const useStyles = makeStyles((theme) => ({
   main: {
     minHeight: '94vh',
@@ -41,7 +44,8 @@ export const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Main() {
-  const classes = useStyles();
+  const classes = useStyles() as any;
+  
 
   const isSearching = useFeedback().isSearching;
   const ids = useUrl().searchedIds;
@@ -49,7 +53,7 @@ export default function Main() {
   return (
     <Box className={classes.main}>
       <AppBar />
-      {ids && ids.length ? <Photos ids={ids} /> : <CenterBackground />}
+      {isFilledArray(ids) ? <PhotosContainer ids={ids} /> : <CenterBackground />}
       <NoMatchedSnackbar />
       <SimpleBackdrop />
       {isSearching ? <LinearProgress /> : null}
