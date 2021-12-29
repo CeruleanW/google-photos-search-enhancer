@@ -17,7 +17,29 @@ export async function sendPost(url: string, options?: any) {
 export function setAxiosDefaultAuthHeader(token: string) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
+export function getAxiosDefaultHeader() {
+  return axios.defaults.headers;
+}
 
+// return the value in Authorization header
 export function getAxiosDefaultAuthHeader() {
-  return axios?.defaults?.headers?.common['Authorization'];
+  const header = getAxiosDefaultHeader();
+  return header.common['Authorization'];
+}
+
+export function addAxiosInterceptor(errorCallback: Function) {
+  return axios.interceptors.response.use(
+    function (response) {
+      // console.log(response.request._url);
+      // console.log(response?.headers);
+      // console.log(response?.request?._headers?.authorization);
+      return response;
+    },
+    function (error) {
+      // Any status codes that falls outside the range of 2xx cause this function to trigger
+      // TODO: if it is invalid token error
+      errorCallback(error);
+      return Promise.reject(error);
+    }
+  );
 }

@@ -4,9 +4,6 @@ import { sendPost } from '../request';
 import { LocalMediaItem } from './types';
 import {MEDIA_ITEMS_SEARCH_API, MEDIA_ITEMS_API} from './constants';
 
-function createSingleItemUrl(url, accessToken) {
-  return `${url}?access_token=${accessToken}`;
-}
 
 // request for all media items and store the result in the IndexedDB
 // return the setted time stamp
@@ -71,30 +68,6 @@ async function requestAPageOfMediaItems(
   return data;
 }
 
-// return a Promise with the fulfilled value
-// the value is an array of object, which has 2 property: baseUrl & productUrl
-export async function requestForSingleItem(
-  ids: string[],
-  accessToken: string
-): Promise<{ baseUrl: string; productUrl: string }[]> {
-  // set a list of requests
-  const urls = ids.map(
-    (id) => `${MEDIA_ITEMS_API}/${id}`
-  );
-  const requests = urls.map((url) => createSingleItemUrl(url, accessToken));
-  const fetches = requests.map((request) =>
-    fetch(request).then((fulfilled) => fulfilled.json())
-  );
-
-  return await Promise.all(fetches).then((fulfilleds) => {
-    const resultUrls = fulfilleds.map((fulfilled) => {
-      const baseUrl = fulfilled.baseUrl;
-      const productUrl = fulfilled.productUrl;
-      return { baseUrl, productUrl };
-    });
-    return resultUrls;
-  });
-}
 
 function extractPropsInMediaItems(responseJson): LocalMediaItem[] {
   const mediaItems = responseJson.mediaItems;

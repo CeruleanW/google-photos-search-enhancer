@@ -10,6 +10,8 @@ import { useUrl } from './Context/UrlsContext';
 import NoMatchedSnackbar from './NoMatchedSnackbar';
 import { CenterBackground } from './CenterBackground';
 import { isFilledArray } from '../utils';
+import { useSelector } from 'react-redux';
+import { selectDisplayedPhotos } from '../providers/redux/photosSlice';
 
 // @ts-ignore
 export const useStyles = makeStyles((theme) => ({
@@ -49,11 +51,12 @@ export default function Main() {
 
   const isSearching = useFeedback().isSearching;
   const ids = useUrl().searchedIds;
+  const displayedPhotos = useSelector(selectDisplayedPhotos);
 
   return (
     <Box className={classes.main}>
       <AppBar />
-      {isFilledArray(ids) ? <PhotosContainer ids={ids} /> : <CenterBackground />}
+      {isFilledArray(displayedPhotos) ? <PhotosContainer ids={ids} list={displayedPhotos} /> : <CenterBackground />}
       <NoMatchedSnackbar />
       <SimpleBackdrop />
       {isSearching ? <LinearProgress /> : null}

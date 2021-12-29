@@ -7,3 +7,6 @@ export const credentials = {
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
   }
 }
+
+export const AUTH_STORAGE_KEY = '@auth';
+export const ACCESS_TOKEN_KEY = '@accessToken';

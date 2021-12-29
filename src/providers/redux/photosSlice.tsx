@@ -2,7 +2,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 // import produce from 'immer';
 import { AppState } from './store';
-import {LocalUrls} from '@/features/media-items';
+import { LocalUrls } from '@/features/media-items';
 
 const initialState: {
   displayedPhotos: LocalUrls[]
@@ -32,6 +32,6 @@ export const {
 } = photosSlice.actions;
 
 export const selectDisplayedPhotos = (state: AppState) =>
-  state[photosSlice.name].displayedPhotos;
+  state[photosSlice.name].displayedPhotos as LocalUrls[];
 export const selectProductUrls = (state: AppState) => state[photosSlice.name].displayedPhotos.map(photo => photo?.productUrl);
 export const selectBaseUrls = (state: AppState) => state[photosSlice.name].displayedPhotos.map(photo => photo?.baseUrl);

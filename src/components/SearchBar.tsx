@@ -98,7 +98,7 @@ export default function SearchBar() {
 
     // request for the base urls and the product urls
     const urls = await requestMediaItemsByIds(ids, accessToken);
-    // console.log(urls);
+    // console.log('urls', urls);
     // send the base urls in response to App
     dispatch(setDisplayedPhotos(urls));
     updatePhotoUrls(urls);

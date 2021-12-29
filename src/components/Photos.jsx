@@ -3,9 +3,6 @@ import { Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Masonry from 'react-masonry-css';
 import Skeleton from '@material-ui/lab/Skeleton';
-import { useUrl } from './Context/UrlsContext';
-import { selectDisplayedPhotos } from '@/providers/redux/photosSlice';
-import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -42,7 +39,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function PhotoList(props) {
-  const {photoUrls} = props;
+  // TODO: baseUrls is absent in photoUrls
+  const { photoUrls, ids } = props;
 
   const classes = useStyles();
   const breakpointColumnsObj = {
@@ -59,17 +57,17 @@ function PhotoList(props) {
 
   return (
     <Masonry
-      breakpointCols={breakpointColumnsObj} 
+      breakpointCols={breakpointColumnsObj}
       className={classes.masonryGrid}
       columnClassName={classes.masonryGridColumn}
     >
-      {props.ids.map((id, index) => (
+      {photoUrls.map((photoItem) => (
         <img
-          key={id}
-          src={`${photoUrls[index]?.baseUrl}=w640-h640`}
+          key={photoItem?.baseUrl}
+          src={`${photoItem?.baseUrl}=w640-h640`}
           alt='Google Photos'
           className={classes.image}
-          onClick={() => handleClick(photoUrls[index]?.productUrl)}
+          onClick={() => handleClick(photoItem?.productUrl)}
         />
       ))}
     </Masonry>
@@ -77,19 +75,18 @@ function PhotoList(props) {
 }
 
 export default function PhotosContainer(props) {
+  const { list } = props;
+
   // Style
   const classes = useStyles();
 
   // States
   const [loadingPhotos, setLoadingPhotos] = useState(true);
-  const photoUrls = useUrl().photoUrls;
-  const displayedPhotos = useSelector(selectDisplayedPhotos);
+  const displayedPhotos = list;
 
   // TODO: because async requests after searching for displaying, we have to wait
   // should fix the timeout logic later
   useEffect(() => {
-    // setLoadingPhotos(true);
-
     const timer = setTimeout(() => {
       setLoadingPhotos(false);
     }, 1200);
@@ -101,14 +98,22 @@ export default function PhotosContainer(props) {
     <div className={classes.root}>
       {loadingPhotos ? (
         <Grid container spacing={1}>
-          {props.ids.map((id) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={id}>
+          {displayedPhotos.map((photoItem) => (
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={4}
+              lg={3}
+              xl={2}
+              key={photoItem?.baseUrl}
+            >
               <Skeleton variant='rect' height={300} />
             </Grid>
           ))}
         </Grid>
       ) : (
-        <PhotoList photoUrls={photoUrls} {...props} />
+        <PhotoList photoUrls={displayedPhotos} {...props} />
       )}
     </div>
   );
