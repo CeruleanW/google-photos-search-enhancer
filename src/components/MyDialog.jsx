@@ -1,27 +1,28 @@
 import React from 'react';
 import {
-  Dialog,
+  Dialog as MUIDialog,
   DialogContent,
   DialogContentText,
   DialogActions,
   Button,
 } from '@material-ui/core';
 
-export default function MyDialog(props) {
+export default function MyDialog({open, children, onAgreed, onClose, ...optionals}) {
+
   const handleIsAgreed = (bool) => () => {
-    props.onAgreed(bool);
-    props.onClose();
+    onAgreed(bool);
+    onClose();
   };
 
   return (
-    <Dialog
-      open={props.open}
+    <MUIDialog
+      open={open}
       onClose={handleIsAgreed(false)}
       aria-describedby='alert-dialog-description'
     >
       <DialogContent>
         <DialogContentText id='alert-dialog-description'>
-          {props.children}
+          {children}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
@@ -32,6 +33,6 @@ export default function MyDialog(props) {
           Confirm
         </Button>
       </DialogActions>
-    </Dialog>
+    </MUIDialog>
   );
 }

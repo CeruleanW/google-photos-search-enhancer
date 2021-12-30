@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import Masonry from 'react-masonry-css';
 import Skeleton from '@material-ui/lab/Skeleton';
+import { PhotoList } from './PhotoList';
 
-const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
     flexWrap: 'wrap',
@@ -37,42 +37,6 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
-
-function PhotoList(props) {
-  // TODO: baseUrls is absent in photoUrls
-  const { photoUrls, ids } = props;
-
-  const classes = useStyles();
-  const breakpointColumnsObj = {
-    default: 6,
-    1920: 4,
-    1280: 3,
-    960: 2,
-    600: 1,
-  };
-
-  const handleClick = (url) => {
-    window.open(url);
-  };
-
-  return (
-    <Masonry
-      breakpointCols={breakpointColumnsObj}
-      className={classes.masonryGrid}
-      columnClassName={classes.masonryGridColumn}
-    >
-      {photoUrls.map((photoItem) => (
-        <img
-          key={photoItem?.baseUrl}
-          src={`${photoItem?.baseUrl}=w640-h640`}
-          alt='Google Photos'
-          className={classes.image}
-          onClick={() => handleClick(photoItem?.productUrl)}
-        />
-      ))}
-    </Masonry>
-  );
-}
 
 export default function PhotosContainer(props) {
   const { list } = props;

@@ -1,5 +1,8 @@
+const UPDATE_TIME_KEY = 'updateTime';
 
-setTimeStamp();
+if (!getTimeStamp()) {
+  setTimeStamp();
+}
 
 
 export function checkNotFirstVisit() {
@@ -13,15 +16,15 @@ export function checkNotFirstVisit() {
 
 export function setTimeStamp(isUpdated = true) {
   if (isUpdated) {
-    localStorage.setItem('updateTime', String(new Date()));
+    localStorage.setItem(UPDATE_TIME_KEY, String(new Date()));
   } else {
-    localStorage.setItem('updateTime', '');
+    localStorage.setItem(UPDATE_TIME_KEY, '');
   }
 }
 
 // return a date object or a empty string
 export function getTimeStamp() {
-  return localStorage.getItem('updateTime');
+  return localStorage.getItem(UPDATE_TIME_KEY);
 }
 
 export async function setUpdateTime() {

@@ -4,10 +4,12 @@ import thunk from 'redux-thunk';
 
 //self-defined dependencies
 import photosReducer, {photosSlice} from './photosSlice';
+import globalReducer, {globalSlice} from './globalSlice';
 
 const baseReducers:Reducer = combineReducers({
   //all reducers should be put here
   [photosSlice.name]: photosReducer,
+  [globalSlice.name]: globalReducer,
 });
 
 const reducers = baseReducers;

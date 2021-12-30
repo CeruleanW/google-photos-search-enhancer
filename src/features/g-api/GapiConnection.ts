@@ -9,7 +9,7 @@ import {MEDIA_ITEMS_SEARCH_API, MEDIA_ITEMS_API} from './constants';
 // return the setted time stamp
 // Default: include archived items
 export async function requestAllMediaItems(
-  accessToken,
+  accessToken?: string,
   url = MEDIA_ITEMS_SEARCH_API,
   httpMethod = 'POST'
 ) {

@@ -5,7 +5,6 @@ import { makeStyles, alpha } from '@material-ui/core/styles';
 import { Button, Grid } from '@material-ui/core';
 import { searchForItems } from '../features/client-storage';
 import { useAccess } from './Context/AccessContext';
-import { useUrlUpdate } from './Context/UrlsContext';
 import { useFeedbackUpdate } from './Context/FeedbackContext';
 import { useDispatch } from 'react-redux';
 import { requestMediaItemsByIds } from '../features/media-items';
@@ -60,9 +59,7 @@ export default function SearchBar() {
   const dispatch = useDispatch();
   const accessToken = useAccess().accessToken;
   const isLogined = useAccess().isLogined;
-  const updatePhotoUrls = useUrlUpdate().handlePhotoUrls;
   const updateIsSearching = useFeedbackUpdate().handleIsSearching;
-  const updateSearchedIds = useUrlUpdate().handleSearchedIds;
   const updateIsNoMatch = useFeedbackUpdate().handleIsNoMatch;
 
   // Local state
@@ -81,14 +78,10 @@ export default function SearchBar() {
     // show the progress feedback
     updateIsSearching(true);
 
-    // reset search result to null
-    updateSearchedIds([]);
-
     // send keyword to search media items from IndexedDB
     // get the image URLs
     const fulfilled = await searchForItems(keyword);
     const ids = fulfilled.map((data) => data?.item?.id);
-    updateSearchedIds(ids);
     if (!ids?.length) {
       // display a error feedback
       updateIsNoMatch(true);
@@ -101,7 +94,6 @@ export default function SearchBar() {
     // console.log('urls', urls);
     // send the base urls in response to App
     dispatch(setDisplayedPhotos(urls));
-    updatePhotoUrls(urls);
   };
 
   const handleClick = () => {

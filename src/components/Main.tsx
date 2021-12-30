@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppBar } from './AppBar';
 import PhotosContainer from './Photos';
-import SimpleBackdrop from './Backdrop';
+import { UpdateLocalDataBackDrop } from './UpdateLocalDataBackDrop';
 import { Box, LinearProgress } from '@material-ui/core/';
 import { useFeedback } from './Context/FeedbackContext';
 import { makeStyles } from '@material-ui/core/styles';
-import { useUrl } from './Context/UrlsContext';
-
 import NoMatchedSnackbar from './NoMatchedSnackbar';
 import { CenterBackground } from './CenterBackground';
 import { isFilledArray } from '../utils';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { selectDisplayedPhotos } from '../providers/redux/photosSlice';
+import { selectSnackbar, resetSnackbar } from '../providers/redux/globalSlice';
+import { UpdateResultSnackbar } from './UpdateResultSnackbar';
+import { Drawer } from './Drawer';
+import styled from 'styled-components';
 
 // @ts-ignore
 export const useStyles = makeStyles((theme) => ({
@@ -45,21 +47,41 @@ export const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const StyledMain = styled.main`
+  display: flex;
+`;
+
+const FlexColContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+`;
+
 export default function Main() {
   const classes = useStyles() as any;
-  
+  const dispatch = useDispatch();
+
 
   const isSearching = useFeedback().isSearching;
-  const ids = useUrl().searchedIds;
   const displayedPhotos = useSelector(selectDisplayedPhotos);
+  const snackbar = useSelector(selectSnackbar);
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+
+  const handleSnackbarClose = () => {
+    dispatch(resetSnackbar());
+  };
 
   return (
     <Box className={classes.main}>
-      <AppBar />
-      {isFilledArray(displayedPhotos) ? <PhotosContainer ids={ids} list={displayedPhotos} /> : <CenterBackground />}
+      <Drawer show={isDrawerOpen} onHide={() => setIsDrawerOpen(false)} />
+      <AppBar onOpenDrawer={setIsDrawerOpen} />
+      {isFilledArray(displayedPhotos) ? <PhotosContainer list={displayedPhotos} /> : <CenterBackground />}
       <NoMatchedSnackbar />
-      <SimpleBackdrop />
+      <UpdateLocalDataBackDrop />
       {isSearching ? <LinearProgress /> : null}
+      <UpdateResultSnackbar content={snackbar} onClose={handleSnackbarClose}></UpdateResultSnackbar>
     </Box>
   );
 }

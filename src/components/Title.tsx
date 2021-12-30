@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export function Title({ setIsDrawerOpen, clsx, isDrawerOpen }) {
+export function Title({ setIsDrawerOpen }) {
   const classes = useStyles();
 
   return (
@@ -31,7 +31,6 @@ export function Title({ setIsDrawerOpen, clsx, isDrawerOpen }) {
         aria-label='open drawer'
         onClick={() => setIsDrawerOpen(true)}
         edge='start'
-        className={clsx(classes.menuButton, isDrawerOpen && classes.hide)}
       >
         <MenuIcon />
       </IconButton>
