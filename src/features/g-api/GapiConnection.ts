@@ -1,4 +1,5 @@
 // https://developers.google.com/photos/library/guides/access-media-items
+// https://developers.google.com/photos/library/reference/rest/v1/mediaItems/search
 import { setMediaItems, setTimeStamp, getTimeStamp } from '../client-storage';
 import { sendPost } from '../request';
 import { LocalMediaItem } from './types';
